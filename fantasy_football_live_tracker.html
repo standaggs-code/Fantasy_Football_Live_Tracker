@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fantasy Football Live Tracker</title>
+
+    <!-- ======================================================= -->
+    <!--  USER CONFIGURATION: EDIT YOUR USERNAME                 -->
+    <!-- ======================================================= -->
+    <script>
+        const SLEEPER_USERNAME = "standaggs";
+    </script>
+    <!-- ======================================================= -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .play-card {
+            animation: fadeInDown 0.3s ease-out forwards;
+        }
+        .team-logo { width: 24px; height: 24px; object-fit: contain; }
+        .matchup-logo { width: 32px; height: 32px; object-fit: contain; }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed; inset: 0; background: #030712; z-index: 60; 
+            transition: opacity 0.3s ease-in-out;
+        }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1); border-left-color: #22c55e;
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Responsive Sidebar Logic */
+        #sidebar {
+            transition: margin 0.3s ease, transform 0.3s ease;
+        }
+        @media (min-width: 768px) {
+            #sidebar.desktop-closed {
+                margin-left: -380px; 
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-200 font-sans h-screen overflow-hidden flex relative">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="flex flex-col items-center justify-center" style="display: flex; opacity: 1;">
+        <div class="spinner mb-4"></div>
+        <h2 class="text-xl font-bold text-white mb-2" id="loading-title">Connecting to Sleeper API</h2>
+        <p class="text-gray-400 text-sm" id="loading-text">Extracting rosters and matchups...</p>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-30 hidden transition-opacity md:hidden"></div>
+
+    <!-- Sidebar: Rosters & Active Games -->
+    <aside id="sidebar" class="w-[380px] bg-gray-900 border-r border-gray-800 flex flex-col h-full overflow-y-auto fixed md:relative z-40 transform -translate-x-full md:translate-x-0 shrink-0">
+        
+        <!-- Header & League Selector -->
+        <div class="p-3 border-b border-gray-800 sticky top-0 bg-gray-900 z-20 shadow-sm">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h1 class="text-lg font-bold text-white flex items-center gap-2">
+                        <span class="relative flex h-3 w-3">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                        Live Tracker
+                    </h1>
+                    <p class="text-[10px] text-gray-500 mt-1">Polling ESPN & Sleeper...</p>
+                </div>
+                <!-- Mobile Close Button -->
+                <button id="close-sidebar-btn" class="md:hidden p-2 -mr-2 text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Username & League Dropdown -->
+            <div class="flex items-center gap-2 mb-2">
+                <input type="text" id="username-input" class="bg-gray-950 text-sm text-white px-2 py-1.5 rounded w-full border border-gray-700 focus:outline-none focus:border-green-500 transition-colors" placeholder="Sleeper Username">
+                <button id="load-user-btn" class="bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-3 py-1.5 rounded transition-colors shadow-sm">Load</button>
+            </div>
+            <select id="league-selector" class="w-full bg-gray-950 text-sm text-white px-2 py-1.5 rounded border border-gray-700 hidden focus:outline-none focus:border-green-500 cursor-pointer text-ellipsis overflow-hidden">
+                <!-- Populated dynamically -->
+            </select>
+        </div>
+
+        <!-- Legend -->
+        <div class="px-3 py-2 border-b border-gray-800 bg-gray-950/30 flex flex-wrap gap-2 text-[9px] uppercase tracking-wider text-gray-500 justify-center shrink-0">
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-blue-800"></span> Upcoming</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-green-600"></span> Live</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-gray-700"></span> Final</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-red-800"></span> Out/IR</div>
+        </div>
+
+        <!-- Active Games Section -->
+        <div class="p-3 border-b border-gray-800 shrink-0">
+            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Live Tracked Games</h2>
+            <div id="active-games-container" class="space-y-2">
+                <p class="text-[11px] md:text-xs text-gray-600 italic">Waiting for game data...</p>
+            </div>
+        </div>
+
+        <!-- My Team -->
+        <div class="p-3 border-b border-gray-800 shrink-0">
+            <div class="mb-2">
+                <h2 class="text-sm font-bold text-green-400 uppercase tracking-wider truncate mb-1" id="my-team-name">My Team</h2>
+                <div class="flex gap-2 text-[9px] text-gray-500 font-bold uppercase border-b border-gray-800/50 pb-1">
+                    <span class="flex-1 text-center">Starters</span>
+                    <span class="flex-1 text-center">Bench & IR</span>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <div id="my-team-active" class="flex-1 border-r border-gray-800 pr-1"></div>
+                <div id="my-team-bench" class="flex-1 pl-1"></div>
+            </div>
+        </div>
+
+        <!-- Opponent Team -->
+        <div class="p-3 mb-4 shrink-0">
+            <div class="mb-2">
+                <h2 class="text-sm font-bold text-red-400 uppercase tracking-wider truncate mb-1" id="opp-team-name">Opponent</h2>
+                <div class="flex gap-2 text-[9px] text-gray-500 font-bold uppercase border-b border-gray-800/50 pb-1">
+                    <span class="flex-1 text-center">Starters</span>
+                    <span class="flex-1 text-center">Bench & IR</span>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <div id="opp-team-active" class="flex-1 border-r border-gray-800 pr-1"></div>
+                <div id="opp-team-bench" class="flex-1 pl-1"></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content: Dual Live Feeds -->
+    <main class="flex-1 flex flex-col h-full bg-gray-950 relative min-w-0">
+        <header class="p-3 md:p-4 border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm shadow-sm z-10 flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-3">
+                <button id="sidebar-toggle-btn" class="p-2 bg-gray-800 rounded hover:bg-gray-700 text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h2 class="text-lg md:text-xl font-bold text-white truncate">Play-by-Play Feed</h2>
+            </div>
+            <div class="text-[10px] md:text-xs text-gray-500 px-2 md:px-3 py-1 bg-gray-800 rounded-full border border-gray-700 shrink-0" id="last-update">
+                Waiting...
+            </div>
+        </header>
+
+        <!-- Feeds Container -->
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+            <!-- Filtered Feed (Fantasy Alerts) -->
+            <div class="flex-1 flex flex-col border-b md:border-b-0 md:border-r border-gray-800 relative bg-gray-950/50 min-h-0">
+                <div class="p-2 border-b border-gray-800 bg-gray-900/80 flex justify-between items-center z-10 shrink-0">
+                    <span class="text-xs font-bold text-green-400 uppercase tracking-widest flex items-center gap-2">
+                        🚨 Fantasy Alerts
+                    </span>
+                    <button onclick="clearFeed('feed-container-filtered')" class="text-[10px] text-gray-500 hover:text-white uppercase tracking-wider">Clear</button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 md:p-4 flex flex-col gap-3" id="feed-container-filtered"></div>
+                <div id="empty-state-filtered" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-50 z-0">
+                    <svg class="w-12 h-12 text-gray-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <p class="text-gray-500 font-medium text-[11px] md:text-sm text-center px-4">Waiting for fantasy-relevant plays...</p>
+                </div>
+            </div>
+
+            <!-- Unfiltered Feed (All Tracked Plays) -->
+            <div class="flex-1 flex flex-col relative bg-gray-950 min-h-0">
+                <div class="p-2 border-b border-gray-800 bg-gray-900/80 flex justify-between items-center z-10 shrink-0">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        🏈 All Plays
+                    </span>
+                    <button onclick="clearFeed('feed-container-unfiltered')" class="text-[10px] text-gray-500 hover:text-white uppercase tracking-wider">Clear</button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 md:p-4 flex flex-col gap-3" id="feed-container-unfiltered"></div>
+                <div id="empty-state-unfiltered" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-50 z-0">
+                    <svg class="w-12 h-12 text-gray-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <p class="text-gray-500 font-medium text-[11px] md:text-sm text-center px-4">Waiting for live tracked plays...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Set Username from config
+        document.getElementById('username-input').value = typeof SLEEPER_USERNAME !== 'undefined' ? SLEEPER_USERNAME : "";
+
+        // --- GLOBALS & STATE ---
+        const SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard";
+        const DEFENSE_KEYWORDS = ["intercept", "sack", "fumble", "safety", "blocked"];
+
+        let TARGET_TEAMS = []; 
+        let MY_TEAM_PARSED = [];
+        let OPP_TEAM_PARSED = [];
+        let MY_DEFENSE = "";
+        let OPPONENT_DEFENSE = "";
+        
+        let MY_TEAM_NAME = "My Team";
+        let OPP_TEAM_NAME = "Opponent";
+        
+        let seenPlays = new Set();
+        let teamLogos = {};
+        let currentGameStates = {};
+        let pollingInterval = null;
+        let matchupInterval = null;
+
+        // Cached Sleeper Data
+        let SLEEPER_PLAYERS_DB = null;
+        let SLEEPER_USER_ID = null;
+        let CURRENT_NFL_WEEK = null;
+        let CURRENT_NFL_SEASON = null;
+        let CURRENT_LEAGUE_ID = null;
+
+        let WEEKLY_PROJECTIONS = {};
+        let CURRENT_MATCHUP_POINTS = {};
+
+        // --- SIDEBAR TOGGLE LOGIC ---
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('sidebar-toggle-btn');
+        const closeBtn = document.getElementById('close-sidebar-btn');
+
+        function toggleSidebar() {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile) {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            } else {
+                sidebar.classList.toggle('desktop-closed');
+            }
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        closeBtn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // --- UI UTILITIES ---
+        function showLoading(msg) {
+            const screen = document.getElementById('loading-screen');
+            document.getElementById('loading-text').innerText = msg;
+            screen.style.display = 'flex';
+            setTimeout(() => screen.style.opacity = '1', 10);
+        }
+
+        function hideLoading() {
+            const screen = document.getElementById('loading-screen');
+            screen.style.opacity = '0';
+            setTimeout(() => screen.style.display = 'none', 300);
+        }
+
+        function clearFeed(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+            if (containerId === 'feed-container-filtered') document.getElementById('empty-state-filtered').style.display = 'flex';
+            if (containerId === 'feed-container-unfiltered') document.getElementById('empty-state-unfiltered').style.display = 'flex';
+        }
+
+        function resetTrackerState() {
+            TARGET_TEAMS = []; 
+            MY_TEAM_PARSED = [];
+            OPP_TEAM_PARSED = [];
+            MY_DEFENSE = "";
+            OPPONENT_DEFENSE = "";
+            MY_TEAM_NAME = "My Team";
+            OPP_TEAM_NAME = "Opponent";
+            seenPlays.clear();
+            currentGameStates = {};
+            CURRENT_MATCHUP_POINTS = {};
+            
+            clearFeed('feed-container-filtered');
+            clearFeed('feed-container-unfiltered');
+            
+            document.getElementById('my-team-active').innerHTML = '';
+            document.getElementById('my-team-bench').innerHTML = '';
+            document.getElementById('opp-team-active').innerHTML = '';
+            document.getElementById('opp-team-bench').innerHTML = '';
+            document.getElementById('my-team-name').innerText = MY_TEAM_NAME;
+            document.getElementById('opp-team-name').innerText = OPP_TEAM_NAME;
+            document.getElementById('active-games-container').innerHTML = '<p class="text-[11px] md:text-xs text-gray-600 italic">Waiting for game data...</p>';
+        }
+
+        // --- SLEEPER API LOGIC ---
+        
+        async function loadUserLeagues() {
+            const usernameInput = document.getElementById('username-input').value.trim();
+            if (!usernameInput) return;
+
+            showLoading(`Looking up user: ${usernameInput}...`);
+            const selector = document.getElementById('league-selector');
+            selector.classList.add('hidden');
+            
+            try {
+                if (!CURRENT_NFL_WEEK || !CURRENT_NFL_SEASON) {
+                    const stateRes = await fetch("https://api.sleeper.app/v1/state/nfl");
+                    const state = await stateRes.json();
+                    CURRENT_NFL_WEEK = state.leg || state.week;
+                    CURRENT_NFL_SEASON = state.season;
+                }
+
+                const userRes = await fetch(`https://api.sleeper.app/v1/user/${usernameInput}`);
+                const user = await userRes.json();
+                if (!user || !user.user_id) throw new Error("User not found.");
+                SLEEPER_USER_ID = user.user_id;
+
+                showLoading("Finding your active leagues...");
+                const leaguesRes = await fetch(`https://api.sleeper.app/v1/user/${SLEEPER_USER_ID}/leagues/nfl/${CURRENT_NFL_SEASON}`);
+                const leagues = await leaguesRes.json();
+
+                if (!leagues || leagues.length === 0) {
+                    throw new Error("No active leagues found for this season.");
+                }
+
+                selector.innerHTML = leagues.map(l => `<option value="${l.league_id}">${l.name}</option>`).join('');
+                selector.classList.remove('hidden');
+
+                await switchLeague(leagues[0].league_id);
+
+            } catch(e) {
+                console.error(e);
+                document.getElementById('loading-text').innerHTML = `<span class="text-red-400">${e.message || "Error loading user data."}</span>`;
+                setTimeout(hideLoading, 3000);
+            }
+        }
+
+        async function switchLeague(leagueId) {
+            showLoading("Extracting league rosters and matchups...");
+            resetTrackerState();
+            CURRENT_LEAGUE_ID = leagueId;
+
+            try {
+                if (!WEEKLY_PROJECTIONS[CURRENT_NFL_WEEK]) {
+                    showLoading("Fetching weekly scoring projections...");
+                    const projRes = await fetch(`https://api.sleeper.app/v1/projections/nfl/regular/${CURRENT_NFL_SEASON}/${CURRENT_NFL_WEEK}`);
+                    WEEKLY_PROJECTIONS[CURRENT_NFL_WEEK] = await projRes.json();
+                }
+
+                const leagueRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}`);
+                const leagueData = await leagueRes.json();
+                const rosterPositions = leagueData.roster_positions || [];
+
+                const rostersRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/rosters`);
+                const rosters = await rostersRes.json();
+                const myRoster = rosters.find(r => r.owner_id === SLEEPER_USER_ID);
+                if (!myRoster) throw new Error("Could not find your roster in this league.");
+
+                const matchupsRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${CURRENT_NFL_WEEK}`);
+                const matchups = await matchupsRes.json();
+                
+                const myMatchup = matchups.find(m => m.roster_id === myRoster.roster_id);
+                const oppMatchup = matchups.find(m => m.matchup_id === myMatchup.matchup_id && m.roster_id !== myRoster.roster_id);
+                const oppRoster = rosters.find(r => r.roster_id === oppMatchup?.roster_id) || {};
+
+                CURRENT_MATCHUP_POINTS = {};
+                matchups.forEach(m => {
+                    if (m.players_points) {
+                        CURRENT_MATCHUP_POINTS = { ...CURRENT_MATCHUP_POINTS, ...m.players_points };
+                    }
+                });
+
+                const usersRes = await fetch(`https://api.sleeper.app/v1/league/${leagueId}/users`);
+                const usersData = await usersRes.json();
+                
+                MY_TEAM_NAME = "My Team";
+                OPP_TEAM_NAME = "Opponent";
+
+                if (myRoster.owner_id) {
+                    const myUser = usersData.find(u => u.user_id === myRoster.owner_id);
+                    if (myUser) {
+                        MY_TEAM_NAME = myUser.metadata?.team_name || myUser.display_name;
+                    }
+                }
+
+                if (oppRoster.owner_id) {
+                    const oppUser = usersData.find(u => u.user_id === oppRoster.owner_id);
+                    if (oppUser) {
+                        OPP_TEAM_NAME = oppUser.metadata?.team_name || oppUser.display_name;
+                    }
+                }
+
+                if (!SLEEPER_PLAYERS_DB) {
+                    showLoading("Downloading NFL Player Database... (One time only)");
+                    const playersRes = await fetch("https://api.sleeper.app/v1/players/nfl");
+                    SLEEPER_PLAYERS_DB = await playersRes.json();
+                }
+
+                function processRoster(matchup, roster) {
+                    if (!matchup) return [];
+                    const activePos = rosterPositions.filter(p => p !== 'BN');
+                    
+                    const starters = matchup.starters.map((id, idx) => ({ 
+                        id, role: activePos[idx] || 'FLEX', isStarter: true 
+                    }));
+                    
+                    const benchIds = matchup.players.filter(id => !matchup.starters.includes(id));
+                    const bench = benchIds.map(id => ({ 
+                        id, 
+                        role: (roster.reserve && roster.reserve.includes(id)) ? 'IR' : 'BN', 
+                        isStarter: false 
+                    }));
+                    
+                    return [...starters, ...bench].map(entry => {
+                        if (!entry.id || entry.id === "0") return null; 
+                        let p = null;
+                        if (entry.id.length <= 4 && isNaN(parseInt(entry.id))) {
+                            p = { id: entry.id, name: entry.id, team: entry.id, status: null, isDef: true };
+                        } else {
+                            const dbP = SLEEPER_PLAYERS_DB[entry.id];
+                            if (dbP) {
+                                p = { 
+                                     id: entry.id,
+                                     name: dbP.last_name || dbP.first_name, 
+                                     team: dbP.team, 
+                                     status: dbP.injury_status?.toUpperCase() || null, 
+                                     isDef: false 
+                                 };
+                            }
+                        }
+                        if (p) {
+                            p.role = entry.role;
+                            p.isStarter = entry.isStarter;
+                            return p;
+                        }
+                        return null;
+                    }).filter(Boolean);
+                }
+
+                MY_TEAM_PARSED = processRoster(myMatchup, myRoster);
+                OPP_TEAM_PARSED = processRoster(oppMatchup, oppRoster);
+                
+                MY_DEFENSE = MY_TEAM_PARSED.find(p => p.isDef)?.name || "";
+                OPPONENT_DEFENSE = OPP_TEAM_PARSED.find(p => p.isDef)?.name || "";
+
+                const allTeams = [...MY_TEAM_PARSED, ...OPP_TEAM_PARSED].map(p => p.team).filter(Boolean);
+                TARGET_TEAMS = [...new Set(allTeams)];
+
+                updateRosterUI(); 
+                
+                await fetchEspnData();
+                
+                if (!pollingInterval) pollingInterval = setInterval(fetchEspnData, 10000);
+                if (!matchupInterval) matchupInterval = setInterval(fetchLiveMatchups, 30000);
+
+                hideLoading();
+
+            } catch(e) {
+                console.error("League Load Error:", e);
+                document.getElementById('loading-text').innerHTML = `<span class="text-red-400">Error: Could not load league.</span>`;
+                setTimeout(hideLoading, 3000);
+            }
+        }
+
+        async function fetchLiveMatchups() {
+            if (!CURRENT_LEAGUE_ID) return;
+            try {
+                const matchupsRes = await fetch(`https://api.sleeper.app/v1/league/${CURRENT_LEAGUE_ID}/matchups/${CURRENT_NFL_WEEK}`);
+                const matchups = await matchupsRes.json();
+                
+                let newPoints = {};
+                matchups.forEach(m => {
+                    if (m.players_points) {
+                        newPoints = { ...newPoints, ...m.players_points };
+                    }
+                });
+                
+                CURRENT_MATCHUP_POINTS = newPoints;
+                updateRosterUI(); // Refresh scores dynamically
+            } catch(e) {
+                console.warn("Background matchup fetch warning:", e);
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('load-user-btn').addEventListener('click', loadUserLeagues);
+        document.getElementById('username-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadUserLeagues();
+        });
+        document.getElementById('league-selector').addEventListener('change', (e) => {
+            switchLeague(e.target.value);
+        });
+
+        // --- UI & TRACKING LOGIC ---
+        function updateRosterUI() {
+            // Track total active points
+            let myTotalActual = 0;
+            let myTotalProj = 0;
+            let oppTotalActual = 0;
+            let oppTotalProj = 0;
+
+            const renderRow = (player, isMyTeam) => {
+                const state = player.team ? currentGameStates[player.team] : null;
+                let bgClass = "bg-gray-800 border-gray-700 text-gray-300"; 
+                
+                if (player.status === "IR" || player.status === "OUT" || player.status === "O") {
+                    bgClass = "bg-red-950/80 border-red-800 text-red-400 line-through opacity-70";
+                } else if (state === "in") {
+                    bgClass = "bg-green-900 border-green-500 text-green-100 shadow-[0_0_8px_rgba(34,197,94,0.4)]"; 
+                } else if (state === "post") {
+                    bgClass = "bg-gray-900 border-gray-800 text-gray-500 opacity-60"; 
+                } else if (state === "pre") {
+                    bgClass = "bg-blue-950/60 border-blue-800/80 text-blue-300"; 
+                }
+
+                // Extract Actual vs Projected Points
+                const rawActual = CURRENT_MATCHUP_POINTS[player.id] || 0;
+                const actual = rawActual.toFixed(2);
+                
+                let rawProj = 0;
+                const projObj = WEEKLY_PROJECTIONS[CURRENT_NFL_WEEK]?.[player.id];
+                if (projObj) {
+                    rawProj = projObj.pts_ppr ?? projObj.pts_half_ppr ?? projObj.pts_std ?? 
+                              projObj.stats?.pts_ppr ?? projObj.stats?.pts_half_ppr ?? projObj.stats?.pts_std ?? 0;
+                }
+                const proj = rawProj.toFixed(2);
+
+                // Add to totals if they are a starter
+                if (player.isStarter) {
+                    if (isMyTeam) {
+                        myTotalActual += rawActual;
+                        myTotalProj += rawProj;
+                    } else {
+                        oppTotalActual += rawActual;
+                        oppTotalProj += rawProj;
+                    }
+                }
+
+                let displayContent = `
+                    <span class="truncate max-w-[65px] leading-tight">${player.name}</span>
+                    <span class="text-[8px] md:text-[9px] opacity-75 font-mono ml-0.5 whitespace-nowrap">(${actual}/${proj})</span>
+                `;
+                
+                if (player.isDef && teamLogos[player.name]) {
+                    displayContent = `
+                        <span class="truncate max-w-[50px] leading-tight">${player.name}</span> 
+                        <span class="text-[8px] md:text-[9px] opacity-75 font-mono mx-0.5 whitespace-nowrap">(${actual}/${proj})</span>
+                        <img src="${teamLogos[player.name]}" class="w-3 h-3 object-contain shrink-0" alt="logo">
+                    `;
+                }
+
+                const displayRole = player.role === 'SUPER_FLEX' ? 'S-FLEX' : player.role;
+                const roleColor = player.isStarter ? "text-gray-400" : "text-gray-600";
+                
+                return `
+                <div class="flex items-center gap-1.5 mb-1">
+                    <div class="text-[8px] font-bold ${roleColor} text-right w-[28px] shrink-0 uppercase">${displayRole}</div>
+                    <div class="min-w-0 flex-1">
+                        <span class="px-1 py-0.5 text-[9px] md:text-[10px] rounded border transition-colors duration-300 ${bgClass} flex items-center w-fit max-w-full leading-none">
+                            ${displayContent}
+                        </span>
+                    </div>
+                </div>`;
+            };
+
+            const renderTeam = (teamParsed, activeId, benchId, isMyTeam) => {
+                const active = teamParsed.filter(p => p.isStarter);
+                const bench = teamParsed.filter(p => !p.isStarter);
+                
+                document.getElementById(activeId).innerHTML = active.map(p => renderRow(p, isMyTeam)).join('');
+                document.getElementById(benchId).innerHTML = bench.map(p => renderRow(p, isMyTeam)).join('');
+            };
+
+            // Reset totals before rendering
+            renderTeam(MY_TEAM_PARSED, 'my-team-active', 'my-team-bench', true);
+            renderTeam(OPP_TEAM_PARSED, 'opp-team-active', 'opp-team-bench', false);
+
+            // Update Team Headers with Scores
+            document.getElementById('my-team-name').innerHTML = `
+                ${MY_TEAM_NAME} 
+                <span class="text-[10px] text-gray-500 font-mono font-normal ml-1">(${myTotalActual.toFixed(2)}/${myTotalProj.toFixed(2)})</span>
+            `;
+            document.getElementById('opp-team-name').innerHTML = `
+                ${OPP_TEAM_NAME} 
+                <span class="text-[10px] text-gray-500 font-mono font-normal ml-1">(${oppTotalActual.toFixed(2)}/${oppTotalProj.toFixed(2)})</span>
+            `;
+        }
+
+        function containsAny(text, keywordsArray) {
+            const lowerText = text.toLowerCase();
+            return keywordsArray.some(item => lowerText.includes(item.toLowerCase()));
+        }
+
+        function getMatchingPlayer(text, teamParsed) {
+            const lowerText = text.toLowerCase();
+            return teamParsed.find(p => lowerText.includes(p.name.toLowerCase()));
+        }
+
+        function determinePlayStyle(playText) {
+            const text = playText.toLowerCase();
+            const isIncomplete = text.includes("incomplete");
+
+            const myPlayer = getMatchingPlayer(text, MY_TEAM_PARSED);
+            const oppPlayer = getMatchingPlayer(text, OPP_TEAM_PARSED);
+
+            if (myPlayer) {
+                if (myPlayer.isDef && containsAny(text, DEFENSE_KEYWORDS)) {
+                    return { classes: "bg-cyan-950/40 border-cyan-500/50 text-cyan-100", badge: `<span class="bg-cyan-900 text-cyan-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🛡️ My Def</span>`, isRelevant: true };
+                }
+                if (!myPlayer.isDef) {
+                    if (!myPlayer.isStarter) {
+                        return { classes: "bg-gray-800/80 border-gray-600 text-gray-400", badge: `<span class="bg-gray-700 text-gray-300 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🪑 My Bench</span>`, isRelevant: true };
+                    }
+                    if (isIncomplete) {
+                        return { classes: "bg-yellow-950/40 border-yellow-500/50 text-yellow-100", badge: `<span class="bg-yellow-900 text-yellow-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ My Team (Inc)</span>`, isRelevant: true };
+                    }
+                    return { classes: "bg-green-950/40 border-green-500/50 text-green-100", badge: `<span class="bg-green-900 text-green-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🚨 My Team</span>`, isRelevant: true };
+                }
+            }
+
+            if (oppPlayer) {
+                if (oppPlayer.isDef && containsAny(text, DEFENSE_KEYWORDS)) {
+                    return { classes: "bg-fuchsia-950/40 border-fuchsia-500/50 text-fuchsia-100", badge: `<span class="bg-fuchsia-900 text-fuchsia-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ Opp Def</span>`, isRelevant: true };
+                }
+                if (!oppPlayer.isDef) {
+                    if (!oppPlayer.isStarter) {
+                        return { classes: "bg-gray-800/80 border-gray-600 text-gray-500", badge: `<span class="bg-gray-700 text-gray-400 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🪑 Opp Bench</span>`, isRelevant: true };
+                    }
+                    if (isIncomplete) {
+                        return { classes: "bg-orange-950/40 border-orange-500/50 text-orange-100", badge: `<span class="bg-orange-900 text-orange-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ Opponent (Inc)</span>`, isRelevant: true };
+                    }
+                    return { classes: "bg-red-950/40 border-red-500/50 text-red-100", badge: `<span class="bg-red-900 text-red-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🚨 Opponent</span>`, isRelevant: true };
+                }
+            }
+
+            return { classes: "bg-gray-800/30 border-gray-700/50 text-gray-400", badge: `<span class="bg-gray-800 text-gray-400 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🏈 Play</span>`, isRelevant: false };
+        }
+
+        function createPlayCard(matchup, downDistance, playText, awayAbbr, homeAbbr, style) {
+            const card = document.createElement('div');
+            card.className = `play-card p-2 md:p-3 rounded-lg border shadow-sm ${style.classes} flex flex-col gap-1 text-[13px] md:text-sm`;
+            let matchupDisplay = `<span class="tracking-wide uppercase">${matchup}</span>`;
+            if (teamLogos[awayAbbr] && teamLogos[homeAbbr]) {
+                 matchupDisplay = `<div class="flex items-center gap-1 mx-1"><img src="${teamLogos[awayAbbr]}" class="w-3.5 h-3.5 md:w-4 md:h-4 object-contain" alt="${awayAbbr}"><span class="text-gray-500">@</span><img src="${teamLogos[homeAbbr]}" class="w-3.5 h-3.5 md:w-4 md:h-4 object-contain" alt="${homeAbbr}"></div>`;
+            }
+            card.innerHTML = `<div class="flex items-center text-[10px] md:text-[11px] font-semibold opacity-90 mb-1">${style.badge}${matchupDisplay}<span class="mx-1.5 md:mx-2 text-gray-600">•</span><span>${downDistance || 'No Down/Distance'}</span></div><div class="leading-relaxed">${playText}</div>`;
+            return card;
+        }
+
+        async function fetchEspnData() {
+            if (TARGET_TEAMS.length === 0) return;
+
+            try {
+                const response = await fetch(SCOREBOARD_URL);
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                const activeGamesUI = [];
+                const events = data.events || [];
+                
+                currentGameStates = {};
+
+                events.forEach(event => {
+                    const competitions = event.competitions || [];
+                    if (competitions.length === 0) return;
+                    const competitors = competitions[0].competitors || [];
+                    
+                    competitors.forEach(c => {
+                        if (c.team?.abbreviation) {
+                            if (c.team.logo) teamLogos[c.team.abbreviation] = c.team.logo;
+                            currentGameStates[c.team.abbreviation] = event.status?.type?.state;
+                        }
+                    });
+                    
+                    const teams = competitors.map(c => c.team?.abbreviation).filter(Boolean);
+                    
+                    if (teams.some(team => TARGET_TEAMS.includes(team))) {
+                        const statusState = event.status?.type?.state;
+                        const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
+                        const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
+                        const homeAbbr = home?.team?.abbreviation;
+                        const awayAbbr = away?.team?.abbreviation;
+                        const homeScore = home?.score || "0";
+                        const awayScore = away?.score || "0";
+                        const matchupStr = `${awayAbbr} @ ${homeAbbr}`; 
+                        
+                        if (statusState === "in" || statusState === "post") {
+                            const clock = event.status?.displayClock || (statusState === "post" ? "Final" : "0:00");
+                            const period = event.status?.period || 1;
+                            
+                            let scoreDisplay = `<span class="font-semibold text-gray-200 text-xs">${awayAbbr} ${awayScore} @ ${homeAbbr} ${homeScore}</span>`;
+                            if (teamLogos[awayAbbr] && teamLogos[homeAbbr]) {
+                                scoreDisplay = `<div class="flex items-center gap-1.5"><div class="flex items-center gap-1"><img src="${teamLogos[awayAbbr]}" class="w-4 h-4 md:w-5 md:h-5 object-contain" alt="${awayAbbr}"><span class="font-bold font-mono text-gray-200 w-4 text-right">${awayScore}</span></div><span class="text-gray-600 text-[9px] md:text-[10px]">@</span><div class="flex items-center gap-1"><span class="font-bold font-mono text-gray-200 w-4 text-right">${homeScore}</span><img src="${teamLogos[homeAbbr]}" class="w-4 h-4 md:w-5 md:h-5 object-contain" alt="${homeAbbr}"></div></div>`;
+                            }
+                            activeGamesUI.push(`<div class="flex justify-between items-center p-2 bg-gray-800 rounded border border-gray-700">${scoreDisplay}<span class="text-[9px] md:text-[10px] text-green-400 font-mono">${statusState === 'post' ? 'Final' : 'Q' + period + ' - ' + clock}</span></div>`);
+                        }
+                        
+                        if (statusState === "in" || statusState === "post") {
+                            const situation = competitions[0].situation || {};
+                            const lastPlayText = situation.lastPlay?.text;
+                            const downDistance = situation.downDistanceText || "";
+                            
+                            if (lastPlayText && lastPlayText !== "Waiting for play data...") {
+                                const playHash = `[${matchupStr}] [${downDistance}] ${lastPlayText}`;
+                                if (!seenPlays.has(playHash)) {
+                                    seenPlays.add(playHash);
+                                    const style = determinePlayStyle(lastPlayText);
+                                    
+                                    document.getElementById('empty-state-unfiltered').style.display = 'none';
+                                    const cardUnfiltered = createPlayCard(matchupStr, downDistance, lastPlayText, awayAbbr, homeAbbr, style);
+                                    document.getElementById('feed-container-unfiltered').prepend(cardUnfiltered);
+                                    
+                                    if (style.isRelevant) {
+                                        document.getElementById('empty-state-filtered').style.display = 'none';
+                                        const cardFiltered = createPlayCard(matchupStr, downDistance, lastPlayText, awayAbbr, homeAbbr, style);
+                                        document.getElementById('feed-container-filtered').prepend(cardFiltered);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                const activeContainer = document.getElementById('active-games-container');
+                activeContainer.innerHTML = activeGamesUI.length > 0 ? activeGamesUI.join('') : `<p class="text-[11px] md:text-xs text-gray-600 italic">No tracked games are currently active.</p>`;
+                
+                document.getElementById('last-update').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+                
+                updateRosterUI();
+
+                if (seenPlays.size > 200) {
+                    const playsArray = Array.from(seenPlays);
+                    seenPlays.clear();
+                    playsArray.slice(-100).forEach(p => seenPlays.add(p));
+                }
+            } catch (error) {
+                console.warn("Background fetch warning:", error);
+            }
+        }
+
+        // Kickoff Initial Load
+        loadUserLeagues();
+
+    </script>
+</body>
+</html>
