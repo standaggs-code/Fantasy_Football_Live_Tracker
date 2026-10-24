@@ -517,7 +517,7 @@
                 const projObj = WEEKLY_PROJECTIONS[CURRENT_NFL_WEEK]?.[player.id];
                 if (projObj) {
                     rawProj = projObj.pts_ppr ?? projObj.pts_half_ppr ?? projObj.pts_std ?? 
-                              projObj.stats?.pts_ppr ?? projObj.stats?.pts_half_ppr ?? projObj.stats?.pts_std ?? 0;
+                               projObj.stats?.pts_ppr ?? projObj.stats?.pts_half_ppr ?? projObj.stats?.pts_std ?? 0;
                 }
                 const proj = rawProj.toFixed(2);
 
@@ -684,17 +684,34 @@
                             const clock = event.status?.displayClock || (statusState === "post" ? "Final" : "0:00");
                             const period = event.status?.period || 1;
                             
+                            // 1. Red Zone Detection
+                            const situation = competitions[0].situation || {};
+                            const isRedZone = situation.isRedZone;
+                            
+                            let rzClass = "bg-gray-800 border-gray-700";
+                            let rzBadge = "";
+                            
+                            if (isRedZone && statusState === "in") {
+                                rzClass = "bg-red-950/40 border-red-800/80 shadow-[0_0_8px_rgba(220,38,38,0.3)]";
+                                rzBadge = `<span class="text-[9px] bg-red-900/80 text-red-200 px-1 py-0.5 rounded mr-2 uppercase animate-pulse font-bold border border-red-700">🔴 RZ</span>`;
+                            }
+
                             let scoreDisplay = `<span class="font-semibold text-gray-200 text-xs">${awayAbbr} ${awayScore} @ ${homeAbbr} ${homeScore}</span>`;
                             if (teamLogos[awayAbbr] && teamLogos[homeAbbr]) {
                                 scoreDisplay = `<div class="flex items-center gap-1.5"><div class="flex items-center gap-1"><img src="${teamLogos[awayAbbr]}" class="w-4 h-4 md:w-5 md:h-5 object-contain" alt="${awayAbbr}"><span class="font-bold font-mono text-gray-200 w-4 text-right">${awayScore}</span></div><span class="text-gray-600 text-[9px] md:text-[10px]">@</span><div class="flex items-center gap-1"><span class="font-bold font-mono text-gray-200 w-4 text-right">${homeScore}</span><img src="${teamLogos[homeAbbr]}" class="w-4 h-4 md:w-5 md:h-5 object-contain" alt="${homeAbbr}"></div></div>`;
                             }
-                            activeGamesUI.push(`<div class="flex justify-between items-center p-2 bg-gray-800 rounded border border-gray-700">${scoreDisplay}<span class="text-[9px] md:text-[10px] text-green-400 font-mono">${statusState === 'post' ? 'Final' : 'Q' + period + ' - ' + clock}</span></div>`);
+                            activeGamesUI.push(`<div class="flex justify-between items-center p-2 rounded border ${rzClass} transition-colors duration-500">${scoreDisplay}<div class="flex items-center">${rzBadge}<span class="text-[9px] md:text-[10px] text-green-400 font-mono">${statusState === 'post' ? 'Final' : 'Q' + period + ' - ' + clock}</span></div></div>`);
                         }
                         
                         if (statusState === "in" || statusState === "post") {
                             const situation = competitions[0].situation || {};
                             const lastPlayText = situation.lastPlay?.text;
-                            const downDistance = situation.downDistanceText || "";
+                            let downDistance = situation.downDistanceText || "";
+                            
+                            // 2. Play Card Red Zone Indicator
+                            if (situation.isRedZone) {
+                                downDistance = `<span class="text-red-400 font-bold animate-pulse">🔴 RZ</span> ` + (downDistance ? `<span class="mx-1 text-gray-600">•</span> ${downDistance}` : '');
+                            }
                             
                             if (lastPlayText && lastPlayText !== "Waiting for play data...") {
                                 const playHash = `[${matchupStr}] [${downDistance}] ${lastPlayText}`;
