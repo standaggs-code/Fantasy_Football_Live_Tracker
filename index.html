@@ -61,6 +61,65 @@
         <p class="text-gray-400 text-sm" id="loading-text">Extracting rosters and matchups...</p>
     </div>
 
+    <!-- Help Modal Overlay -->
+    <div id="help-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex justify-center items-center p-4 transition-opacity opacity-0 duration-300">
+        <div class="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-transform scale-95 duration-300" id="help-modal-content">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-800 bg-gray-800/50">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Feature Guide & FAQ
+                </h2>
+                <button onclick="toggleHelpModal()" class="text-gray-400 hover:text-white p-1 rounded-md hover:bg-gray-700 transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div class="p-5 overflow-y-auto flex-1 text-sm text-gray-300 space-y-5">
+                <div>
+                    <h3 class="font-semibold text-gray-100 mb-1 text-base">How do I use this?</h3>
+                    <p class="leading-relaxed">Just type your exact Sleeper username into the box at the top left and click <strong class="text-white">Load</strong>. The app automatically finds all your active leagues for the current season. Use the dropdown menu below your username to instantly switch between your different leagues. No passwords, logins, or cookies required.</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-100 mb-1 text-base">What is the difference between the two feeds?</h3>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong class="text-green-400">Fantasy Alerts:</strong> Filters the live NFL play-by-play data to <em>only</em> show plays involving players on your active roster, your bench, or your opponent's roster.</li>
+                        <li><strong class="text-gray-400">All Plays:</strong> Shows every single play happening in any real-world NFL game that contains at least one player from either of your fantasy matchups.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-100 mb-1 text-base">What do the numbers next to the player names mean?</h3>
+                    <p class="leading-relaxed">Every player badge includes a running score formatted as <strong class="text-white">(Actual / Projected)</strong>. The actual score updates automatically based on live Sleeper data, and the projected score is pulled directly from Sleeper's weekly projections for your specific league's scoring settings. Your team's total active score is aggregated at the top of the roster list.</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-100 mb-1 text-base">What does the flashing dot next to the "Live Tracker" logo mean?</h3>
+                    <p class="leading-relaxed mb-2">This is your global status beacon:</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-gray-600 shrink-0"></span> <span><strong class="text-gray-400">Static Grey:</strong> Idle. None of your tracked games are currently active.</span></li>
+                        <li class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500 shrink-0 animate-pulse"></span> <span><strong class="text-green-400">Pulsing Green:</strong> Active. At least one game featuring your players is currently being played.</span></li>
+                        <li class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500 shrink-0 animate-pulse"></span> <span><strong class="text-red-400">Pulsing Red:</strong> Red Zone! A tracked game currently has a team inside the 20-yard line.</span></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-100 mb-2 text-base">What do all the colors mean in the Fantasy Alerts feed?</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-950 p-3 rounded border border-gray-800">
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-green-900 border border-green-500 shrink-0"></span> <span>Your Starter <span class="text-gray-500">(Completed Play)</span></span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-red-950 border border-red-500 shrink-0"></span> <span>Opponent Starter <span class="text-gray-500">(Completed Play)</span></span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-yellow-900 border border-yellow-500 shrink-0"></span> <span>Incomplete/Warning <span class="text-gray-500">(Your Team)</span></span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-orange-950 border border-orange-500 shrink-0"></span> <span>Incomplete/Warning <span class="text-gray-500">(Opponent)</span></span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-cyan-900 border border-cyan-500 shrink-0"></span> <span>Defense Alert <span class="text-gray-500">(Your Team)</span></span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-fuchsia-950 border border-fuchsia-500 shrink-0"></span> <span>Defense Alert <span class="text-gray-500">(Opponent)</span></span></div>
+                        <div class="flex items-center gap-2 md:col-span-2"><span class="w-3 h-3 rounded bg-gray-800 border border-gray-600 shrink-0"></span> <span>Bench Player</span></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-gray-800 bg-gray-900 flex justify-end">
+                <button onclick="toggleHelpModal()" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium transition-colors focus:outline-none">Got it</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Sidebar Overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-30 hidden transition-opacity md:hidden"></div>
 
@@ -150,7 +209,12 @@
                 <button id="sidebar-toggle-btn" class="p-2 bg-gray-800 rounded hover:bg-gray-700 text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
-                <h2 class="text-lg md:text-xl font-bold text-white truncate">Play-by-Play Feed</h2>
+                <h2 class="text-lg md:text-xl font-bold text-white truncate flex items-center gap-2">
+                    Play-by-Play Feed
+                    <button onclick="toggleHelpModal()" class="text-gray-500 hover:text-blue-400 transition-colors focus:outline-none" title="Help & FAQ">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </button>
+                </h2>
             </div>
             <div class="text-[10px] md:text-xs text-gray-500 px-2 md:px-3 py-1 bg-gray-800 rounded-full border border-gray-700 shrink-0" id="last-update">
                 Waiting...
@@ -232,7 +296,7 @@
         let WEEKLY_PROJECTIONS = {};
         let CURRENT_MATCHUP_POINTS = {};
 
-        // --- SIDEBAR TOGGLE LOGIC ---
+        // --- SIDEBAR & MODAL LOGIC ---
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
         const toggleBtn = document.getElementById('sidebar-toggle-btn');
@@ -251,6 +315,33 @@
         toggleBtn.addEventListener('click', toggleSidebar);
         closeBtn.addEventListener('click', toggleSidebar);
         overlay.addEventListener('click', toggleSidebar);
+        
+        function toggleHelpModal() {
+            const modal = document.getElementById('help-modal');
+            const content = document.getElementById('help-modal-content');
+            
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                // Slight delay to allow display:block to apply before animating opacity
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                content.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+        
+        // Close modal when clicking on the dark background overlay
+        document.getElementById('help-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                toggleHelpModal();
+            }
+        });
 
         // --- UI UTILITIES ---
         function showLoading(msg) {
