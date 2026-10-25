@@ -537,12 +537,20 @@
                         } else {
                             const dbP = SLEEPER_PLAYERS_DB[entry.id];
                             if (dbP) {
+                                // Extract first initial and raw last name for strict ESPN formatting matches
+                                const fInit = dbP.first_name ? dbP.first_name.charAt(0).toLowerCase() : "";
+                                let rawLast = (dbP.last_name || "").toLowerCase().replace(/\s+(jr\.|sr\.|ii|iii|iv|v)$/i, '');
+                                
                                 p = { 
                                      id: entry.id,
                                      name: dbP.last_name || dbP.first_name, 
                                      team: dbP.team, 
                                      status: dbP.injury_status?.toUpperCase() || null, 
-                                     isDef: false 
+                                     isDef: false,
+                                     search1: `${fInit}.${rawLast}`,
+                                     search2: `${fInit}.${rawLast.replace(/\s+/g, '')}`,
+                                     search3: `${(dbP.first_name || "").toLowerCase()} ${rawLast}`,
+                                     search4: `${fInit}. ${rawLast}`
                                  };
                             }
                         }
@@ -711,7 +719,19 @@
 
         function getMatchingPlayer(text, teamParsed) {
             const lowerText = text.toLowerCase();
-            return teamParsed.find(p => lowerText.includes(p.name.toLowerCase()));
+            return teamParsed.find(p => {
+                if (p.isDef) {
+                    return lowerText.includes(p.name.toLowerCase());
+                }
+                
+                // Strictly match the permutations of Initial.LastName used by ESPN Play-by-Play
+                if (p.search1 && lowerText.includes(p.search1)) return true;
+                if (p.search2 && lowerText.includes(p.search2)) return true;
+                if (p.search3 && lowerText.includes(p.search3)) return true;
+                if (p.search4 && lowerText.includes(p.search4)) return true;
+                
+                return false;
+            });
         }
 
         function determinePlayStyle(playText) {
