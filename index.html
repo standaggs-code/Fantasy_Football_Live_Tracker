@@ -72,9 +72,9 @@
             <div class="flex justify-between items-start mb-3">
                 <div>
                     <h1 class="text-lg font-bold text-white flex items-center gap-2">
-                        <span class="relative flex h-3 w-3">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        <span class="relative flex h-3 w-3" title="Global Tracker Status">
+                          <span id="global-ping" class="absolute inline-flex h-full w-full rounded-full opacity-75 hidden"></span>
+                          <span id="global-dot" class="relative inline-flex rounded-full h-3 w-3 bg-gray-600"></span>
                         </span>
                         Sleeper Live Tracker
                     </h1>
@@ -96,20 +96,20 @@
             </select>
         </div>
 
-        <!-- Legend -->
-        <div class="px-3 py-2 border-b border-gray-800 bg-gray-950/30 flex flex-wrap gap-2 text-[9px] uppercase tracking-wider text-gray-500 justify-center shrink-0">
-            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-blue-800"></span> Upcoming</div>
-            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-green-600"></span> Live</div>
-            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-gray-700"></span> Final</div>
-            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-red-800"></span> Out/IR</div>
-        </div>
-
         <!-- Active Games Section -->
         <div class="p-3 border-b border-gray-800 shrink-0">
             <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Game Status</h2>
             <div id="active-games-container" class="space-y-2">
                 <p class="text-[11px] md:text-xs text-gray-600 italic">Waiting for game data...</p>
             </div>
+        </div>
+
+        <!-- Player Status Legend -->
+        <div class="px-3 py-2 border-b border-gray-800 bg-gray-950/30 flex flex-wrap gap-2 text-[9px] uppercase tracking-wider text-gray-500 justify-center shrink-0">
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-blue-800"></span> Upcoming</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-green-600"></span> Live</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-gray-700"></span> Final</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-red-800"></span> Out/IR</div>
         </div>
 
         <!-- My Team -->
@@ -166,6 +166,14 @@
                         🚨 Fantasy Alerts
                     </span>
                     <button onclick="clearFeed('feed-container-filtered')" class="text-[10px] text-gray-500 hover:text-white uppercase tracking-wider">Clear</button>
+                </div>
+                <!-- Fantasy Alerts Legend -->
+                <div class="px-2 py-1.5 border-b border-gray-800 bg-gray-950/40 flex flex-wrap gap-3 text-[9px] uppercase tracking-wider text-gray-500 justify-center shrink-0 z-10 shadow-inner">
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-green-500"></span> My Team</div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-red-500"></span> Opponent</div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-yellow-500"></span> Inc</div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-cyan-500"></span> Def</div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-gray-500"></span> Bench</div>
                 </div>
                 <div class="flex-1 overflow-y-auto p-3 md:p-4 flex flex-col gap-3" id="feed-container-filtered"></div>
                 <div id="empty-state-filtered" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-50 z-0">
@@ -263,6 +271,27 @@
             if (containerId === 'feed-container-filtered') document.getElementById('empty-state-filtered').style.display = 'flex';
             if (containerId === 'feed-container-unfiltered') document.getElementById('empty-state-unfiltered').style.display = 'flex';
         }
+        
+        function updateGlobalStatus(hasActive, hasRedZone) {
+            const ping = document.getElementById('global-ping');
+            const dot = document.getElementById('global-dot');
+            
+            // Reset base classes
+            ping.className = "absolute inline-flex h-full w-full rounded-full opacity-75";
+            dot.className = "relative inline-flex rounded-full h-3 w-3";
+            
+            if (hasRedZone) {
+                ping.classList.add('animate-ping', 'bg-red-400');
+                dot.classList.add('bg-red-500');
+            } else if (hasActive) {
+                ping.classList.add('animate-ping', 'bg-green-400');
+                dot.classList.add('bg-green-500');
+            } else {
+                // Idle state: no ping, grey dot
+                ping.classList.add('hidden');
+                dot.classList.add('bg-gray-600');
+            }
+        }
 
         function resetTrackerState() {
             TARGET_TEAMS = []; 
@@ -286,6 +315,8 @@
             document.getElementById('my-team-name').innerText = MY_TEAM_NAME;
             document.getElementById('opp-team-name').innerText = OPP_TEAM_NAME;
             document.getElementById('active-games-container').innerHTML = '<p class="text-[11px] md:text-xs text-gray-600 italic">Waiting for game data...</p>';
+            
+            updateGlobalStatus(false, false);
         }
 
         // --- SLEEPER API LOGIC ---
@@ -654,6 +685,9 @@
                 const activeGamesUI = [];
                 const events = data.events || [];
                 
+                let globalActiveGame = false;
+                let globalRedZoneGame = false;
+                
                 currentGameStates = {};
 
                 events.forEach(event => {
@@ -680,6 +714,10 @@
                         const awayScore = away?.score || "0";
                         const matchupStr = `${awayAbbr} @ ${homeAbbr}`; 
                         
+                        if (statusState === "in") {
+                            globalActiveGame = true;
+                        }
+                        
                         if (statusState === "in" || statusState === "post") {
                             const clock = event.status?.displayClock || (statusState === "post" ? "Final" : "0:00");
                             const period = event.status?.period || 1;
@@ -692,6 +730,7 @@
                             let rzBadge = "";
                             
                             if (isRedZone && statusState === "in") {
+                                globalRedZoneGame = true;
                                 rzClass = "bg-red-950/40 border-red-800/80 shadow-[0_0_8px_rgba(220,38,38,0.3)]";
                                 rzBadge = `<span class="text-[9px] bg-red-900/80 text-red-200 px-1 py-0.5 rounded mr-2 uppercase animate-pulse font-bold border border-red-700">🔴 RZ</span>`;
                             }
@@ -739,6 +778,7 @@
                 
                 document.getElementById('last-update').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
                 
+                updateGlobalStatus(globalActiveGame, globalRedZoneGame);
                 updateRosterUI();
 
                 if (seenPlays.size > 200) {
