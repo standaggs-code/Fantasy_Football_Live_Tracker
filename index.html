@@ -20,6 +20,9 @@
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
         
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -89,7 +92,7 @@
                 </div>
                 <div>
                     <h3 class="font-semibold text-gray-100 mb-1 text-base">What do the numbers next to the player names mean?</h3>
-                    <p class="leading-relaxed">Every player badge includes a running score formatted as <strong class="text-white">(Actual / Projected)</strong>. The actual score updates automatically based on live Sleeper data, and the projected score is pulled directly from Sleeper's weekly projections for your specific league's scoring settings. Your team's total active score is aggregated at the top of the roster list.</p>
+                    <p class="leading-relaxed">Every player badge includes a running score formatted as <strong class="text-white">(Actual / Projected) [Game Clock]</strong>. The actual score updates automatically based on live Sleeper data, and the projected score is pulled directly from Sleeper's weekly projections for your specific league's scoring settings. Your team's total active score is aggregated at the top of the roster list.</p>
                 </div>
                 <div>
                     <h3 class="font-semibold text-gray-100 mb-1 text-base">What does the flashing dot next to the "Live Tracker" logo mean?</h3>
@@ -110,6 +113,7 @@
                         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-cyan-900 border border-cyan-500 shrink-0"></span> <span>Defense Alert <span class="text-gray-500">(Your Team)</span></span></div>
                         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-fuchsia-950 border border-fuchsia-500 shrink-0"></span> <span>Defense Alert <span class="text-gray-500">(Opponent)</span></span></div>
                         <div class="flex items-center gap-2 md:col-span-2"><span class="w-3 h-3 rounded bg-gray-800 border border-gray-600 shrink-0"></span> <span>Bench Player</span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-yellow-400 border border-yellow-200 shrink-0 shadow-[0_0_8px_rgba(250,204,21,0.8)]"></span> <span>Scoring Play <span class="text-gray-500">(TD, FG, Safety)</span></span></div>
                     </div>
                 </div>
             </div>
@@ -186,6 +190,11 @@
             </div>
         </div>
 
+        <!-- Matchup Margin -->
+        <div id="matchup-margin" class="px-3 py-1.5 bg-gray-950/50 text-center text-[10px] uppercase tracking-widest font-bold border-b border-gray-800 shrink-0 text-gray-500 shadow-inner">
+            Vs
+        </div>
+
         <!-- Opponent Team -->
         <div class="p-3 mb-4 shrink-0">
             <div class="mb-2">
@@ -204,8 +213,9 @@
 
     <!-- Main Content: Dual Live Feeds -->
     <main class="flex-1 flex flex-col h-full bg-gray-950 relative min-w-0">
-        <header class="p-3 md:p-4 border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm shadow-sm z-10 flex justify-between items-center shrink-0">
-            <div class="flex items-center gap-3">
+        <header class="p-3 md:p-4 border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm shadow-sm z-10 flex items-center shrink-0">
+            
+            <div class="flex items-center gap-3 shrink-0">
                 <button id="sidebar-toggle-btn" class="p-2 bg-gray-800 rounded hover:bg-gray-700 text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
@@ -216,7 +226,13 @@
                     </button>
                 </h2>
             </div>
-            <div class="text-[10px] md:text-xs text-gray-500 px-2 md:px-3 py-1 bg-gray-800 rounded-full border border-gray-700 shrink-0" id="last-update">
+            
+            <!-- Dynamic Active Games Scoreboard Ticker -->
+            <div id="header-games-ticker" class="hidden md:flex flex-1 overflow-x-auto no-scrollbar items-center gap-3 text-xs font-mono border-l border-gray-800 ml-4 pl-4 h-full whitespace-nowrap mask-image-fade">
+                <!-- Mini scores injected here -->
+            </div>
+
+            <div class="text-[10px] md:text-xs text-gray-500 px-2 md:px-3 py-1 bg-gray-800 rounded-full border border-gray-700 shrink-0 ml-auto" id="last-update">
                 Waiting...
             </div>
         </header>
@@ -322,7 +338,6 @@
             
             if (modal.classList.contains('hidden')) {
                 modal.classList.remove('hidden');
-                // Slight delay to allow display:block to apply before animating opacity
                 setTimeout(() => {
                     modal.classList.remove('opacity-0');
                     content.classList.remove('scale-95');
@@ -367,7 +382,6 @@
             const ping = document.getElementById('global-ping');
             const dot = document.getElementById('global-dot');
             
-            // Reset base classes
             ping.className = "absolute inline-flex h-full w-full rounded-full opacity-75";
             dot.className = "relative inline-flex rounded-full h-3 w-3";
             
@@ -378,7 +392,6 @@
                 ping.classList.add('animate-ping', 'bg-green-400');
                 dot.classList.add('bg-green-500');
             } else {
-                // Idle state: no ping, grey dot
                 ping.classList.add('hidden');
                 dot.classList.add('bg-gray-600');
             }
@@ -406,6 +419,8 @@
             document.getElementById('my-team-name').innerText = MY_TEAM_NAME;
             document.getElementById('opp-team-name').innerText = OPP_TEAM_NAME;
             document.getElementById('active-games-container').innerHTML = '<p class="text-[11px] md:text-xs text-gray-600 italic">Waiting for game data...</p>';
+            document.getElementById('header-games-ticker').innerHTML = '';
+            document.getElementById('matchup-margin').innerHTML = 'Vs';
             
             updateGlobalStatus(false, false);
         }
@@ -537,7 +552,6 @@
                         } else {
                             const dbP = SLEEPER_PLAYERS_DB[entry.id];
                             if (dbP) {
-                                // Extract first initial and raw last name for strict ESPN formatting matches
                                 const fInit = dbP.first_name ? dbP.first_name.charAt(0).toLowerCase() : "";
                                 let rawLast = (dbP.last_name || "").toLowerCase().replace(/\s+(jr\.|sr\.|ii|iii|iv|v)$/i, '');
                                 
@@ -626,7 +640,10 @@
             let oppTotalProj = 0;
 
             const renderRow = (player, isMyTeam) => {
-                const state = player.team ? currentGameStates[player.team] : null;
+                const teamData = player.team ? currentGameStates[player.team] : null;
+                const state = teamData ? teamData.state : null;
+                const clock = teamData ? teamData.clock : null;
+                
                 let bgClass = "bg-gray-800 border-gray-700 text-gray-300"; 
                 
                 if (player.status === "IR" || player.status === "OUT" || player.status === "O") {
@@ -661,17 +678,27 @@
                         oppTotalProj += rawProj;
                     }
                 }
+                
+                // Clock Display Snippet
+                let clockDisplay = '';
+                if (state === 'in') {
+                    clockDisplay = `<span class="text-[7px] md:text-[8px] text-green-400/80 ml-1 font-mono tracking-tighter">[${clock}]</span>`;
+                } else if (state === 'post') {
+                    clockDisplay = `<span class="text-[7px] md:text-[8px] text-gray-500 ml-1 font-mono tracking-tighter">[Final]</span>`;
+                }
 
                 let displayContent = `
                     <span class="truncate max-w-[65px] leading-tight">${player.name}</span>
                     <span class="text-[8px] md:text-[9px] opacity-75 font-mono ml-0.5 whitespace-nowrap">(${actual}/${proj})</span>
+                    ${clockDisplay}
                 `;
                 
                 if (player.isDef && teamLogos[player.name]) {
                     displayContent = `
                         <span class="truncate max-w-[50px] leading-tight">${player.name}</span> 
                         <span class="text-[8px] md:text-[9px] opacity-75 font-mono mx-0.5 whitespace-nowrap">(${actual}/${proj})</span>
-                        <img src="${teamLogos[player.name]}" class="w-3 h-3 object-contain shrink-0" alt="logo">
+                        ${clockDisplay}
+                        <img src="${teamLogos[player.name]}" class="w-3 h-3 object-contain shrink-0 ml-1" alt="logo">
                     `;
                 }
 
@@ -710,6 +737,20 @@
                 ${OPP_TEAM_NAME} 
                 <span class="text-[10px] text-gray-500 font-mono font-normal ml-1">(${oppTotalActual.toFixed(2)}/${oppTotalProj.toFixed(2)})</span>
             `;
+            
+            // Calculate and Inject Margin
+            const diff = myTotalActual - oppTotalActual;
+            const marginEl = document.getElementById('matchup-margin');
+            
+            if (myTotalActual === 0 && oppTotalActual === 0) {
+                marginEl.innerHTML = `<span class="text-gray-500">Tied (0.00 - 0.00)</span>`;
+            } else if (diff > 0) {
+                marginEl.innerHTML = `<span class="text-green-400 drop-shadow-sm">Winning by ${diff.toFixed(2)}</span>`;
+            } else if (diff < 0) {
+                marginEl.innerHTML = `<span class="text-red-400 drop-shadow-sm">Losing by ${Math.abs(diff).toFixed(2)}</span>`;
+            } else {
+                marginEl.innerHTML = `<span class="text-gray-400 drop-shadow-sm">Matchup Tied</span>`;
+            }
         }
 
         function containsAny(text, keywordsArray) {
@@ -724,7 +765,6 @@
                     return lowerText.includes(p.name.toLowerCase());
                 }
                 
-                // Strictly match the permutations of Initial.LastName used by ESPN Play-by-Play
                 if (p.search1 && lowerText.includes(p.search1)) return true;
                 if (p.search2 && lowerText.includes(p.search2)) return true;
                 if (p.search3 && lowerText.includes(p.search3)) return true;
@@ -737,50 +777,64 @@
         function determinePlayStyle(playText) {
             const text = playText.toLowerCase();
             const isIncomplete = text.includes("incomplete");
+            const isScoring = text.includes("touchdown") || text.includes("field goal is good") || text.includes("two-point conversion") || text.includes("extra point is good") || text.includes(" safety");
 
             const myPlayer = getMatchingPlayer(text, MY_TEAM_PARSED);
             const oppPlayer = getMatchingPlayer(text, OPP_TEAM_PARSED);
 
             if (myPlayer) {
                 if (myPlayer.isDef && containsAny(text, DEFENSE_KEYWORDS)) {
-                    return { classes: "bg-cyan-950/40 border-cyan-500/50 text-cyan-100", badge: `<span class="bg-cyan-900 text-cyan-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🛡️ My Def</span>`, isRelevant: true };
+                    return { classes: "bg-cyan-950/40 border-cyan-500/50 text-cyan-100", badge: `<span class="bg-cyan-900 text-cyan-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🛡️ My Def</span>`, isRelevant: true, isScoring: isScoring };
                 }
                 if (!myPlayer.isDef) {
                     if (!myPlayer.isStarter) {
-                        return { classes: "bg-gray-800/80 border-gray-600 text-gray-400", badge: `<span class="bg-gray-700 text-gray-300 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🪑 My Bench</span>`, isRelevant: true };
+                        return { classes: "bg-gray-800/80 border-gray-600 text-gray-400", badge: `<span class="bg-gray-700 text-gray-300 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🪑 My Bench</span>`, isRelevant: true, isScoring: isScoring };
                     }
                     if (isIncomplete) {
-                        return { classes: "bg-yellow-950/40 border-yellow-500/50 text-yellow-100", badge: `<span class="bg-yellow-900 text-yellow-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ My Team (Inc)</span>`, isRelevant: true };
+                        return { classes: "bg-yellow-950/40 border-yellow-500/50 text-yellow-100", badge: `<span class="bg-yellow-900 text-yellow-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ My Team (Inc)</span>`, isRelevant: true, isScoring: false };
                     }
-                    return { classes: "bg-green-950/40 border-green-500/50 text-green-100", badge: `<span class="bg-green-900 text-green-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🚨 My Team</span>`, isRelevant: true };
+                    return { classes: "bg-green-950/40 border-green-500/50 text-green-100", badge: `<span class="bg-green-900 text-green-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🚨 My Team</span>`, isRelevant: true, isScoring: isScoring };
                 }
             }
 
             if (oppPlayer) {
                 if (oppPlayer.isDef && containsAny(text, DEFENSE_KEYWORDS)) {
-                    return { classes: "bg-fuchsia-950/40 border-fuchsia-500/50 text-fuchsia-100", badge: `<span class="bg-fuchsia-900 text-fuchsia-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ Opp Def</span>`, isRelevant: true };
+                    return { classes: "bg-fuchsia-950/40 border-fuchsia-500/50 text-fuchsia-100", badge: `<span class="bg-fuchsia-900 text-fuchsia-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ Opp Def</span>`, isRelevant: true, isScoring: isScoring };
                 }
                 if (!oppPlayer.isDef) {
                     if (!oppPlayer.isStarter) {
-                        return { classes: "bg-gray-800/80 border-gray-600 text-gray-500", badge: `<span class="bg-gray-700 text-gray-400 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🪑 Opp Bench</span>`, isRelevant: true };
+                        return { classes: "bg-gray-800/80 border-gray-600 text-gray-500", badge: `<span class="bg-gray-700 text-gray-400 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🪑 Opp Bench</span>`, isRelevant: true, isScoring: isScoring };
                     }
                     if (isIncomplete) {
-                        return { classes: "bg-orange-950/40 border-orange-500/50 text-orange-100", badge: `<span class="bg-orange-900 text-orange-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ Opponent (Inc)</span>`, isRelevant: true };
+                        return { classes: "bg-orange-950/40 border-orange-500/50 text-orange-100", badge: `<span class="bg-orange-900 text-orange-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ Opponent (Inc)</span>`, isRelevant: true, isScoring: false };
                     }
-                    return { classes: "bg-red-950/40 border-red-500/50 text-red-100", badge: `<span class="bg-red-900 text-red-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🚨 Opponent</span>`, isRelevant: true };
+                    return { classes: "bg-red-950/40 border-red-500/50 text-red-100", badge: `<span class="bg-red-900 text-red-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🚨 Opponent</span>`, isRelevant: true, isScoring: isScoring };
                 }
             }
 
-            return { classes: "bg-gray-800/30 border-gray-700/50 text-gray-400", badge: `<span class="bg-gray-800 text-gray-400 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🏈 Play</span>`, isRelevant: false };
+            return { classes: "bg-gray-800/30 border-gray-700/50 text-gray-400", badge: `<span class="bg-gray-800 text-gray-400 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🏈 Play</span>`, isRelevant: false, isScoring: isScoring };
         }
 
         function createPlayCard(matchup, downDistance, playText, awayAbbr, homeAbbr, style) {
             const card = document.createElement('div');
-            card.className = `play-card p-2 md:p-3 rounded-lg border shadow-sm ${style.classes} flex flex-col gap-1 text-[13px] md:text-sm`;
+            
+            let finalClasses = style.classes;
+            if (style.isScoring && style.isRelevant) {
+                // Apply gold glow for scoring plays involving rostered players
+                finalClasses = "bg-yellow-950/20 border-yellow-400 text-yellow-100 shadow-[0_0_12px_rgba(250,204,21,0.3)]";
+            }
+            
+            card.className = `play-card p-2 md:p-3 rounded-lg border shadow-sm ${finalClasses} flex flex-col gap-1 text-[13px] md:text-sm`;
             let matchupDisplay = `<span class="tracking-wide uppercase">${matchup}</span>`;
+            
             if (teamLogos[awayAbbr] && teamLogos[homeAbbr]) {
                  matchupDisplay = `<div class="flex items-center gap-1 mx-1"><img src="${teamLogos[awayAbbr]}" class="w-3.5 h-3.5 md:w-4 md:h-4 object-contain" alt="${awayAbbr}"><span class="text-gray-500">@</span><img src="${teamLogos[homeAbbr]}" class="w-3.5 h-3.5 md:w-4 md:h-4 object-contain" alt="${homeAbbr}"></div>`;
             }
+            
+            if (style.isScoring && style.isRelevant) {
+                matchupDisplay += `<span class="ml-1 text-[14px] animate-bounce inline-block">💥</span>`;
+            }
+            
             card.innerHTML = `<div class="flex items-center text-[10px] md:text-[11px] font-semibold opacity-90 mb-1">${style.badge}${matchupDisplay}<span class="mx-1.5 md:mx-2 text-gray-600">•</span><span>${downDistance || 'No Down/Distance'}</span></div><div class="leading-relaxed">${playText}</div>`;
             return card;
         }
@@ -794,6 +848,7 @@
                 
                 const data = await response.json();
                 const activeGamesUI = [];
+                const headerGamesUI = [];
                 const events = data.events || [];
                 
                 let globalActiveGame = false;
@@ -809,7 +864,13 @@
                     competitors.forEach(c => {
                         if (c.team?.abbreviation) {
                             if (c.team.logo) teamLogos[c.team.abbreviation] = c.team.logo;
-                            currentGameStates[c.team.abbreviation] = event.status?.type?.state;
+                            
+                            let tState = event.status?.type?.state;
+                            let tClock = event.status?.displayClock || (tState === "post" ? "Final" : "0:00");
+                            let tPeriod = event.status?.period || 1;
+                            let tClockText = tState === 'post' ? 'Final' : (tState === 'pre' ? 'Pregame' : 'Q' + tPeriod + ' ' + tClock);
+                            
+                            currentGameStates[c.team.abbreviation] = { state: tState, clock: tClockText };
                         }
                     });
                     
@@ -821,45 +882,64 @@
                         const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
                         const homeAbbr = home?.team?.abbreviation;
                         const awayAbbr = away?.team?.abbreviation;
-                        const homeScore = home?.score || "0";
-                        const awayScore = away?.score || "0";
+                        const homeScore = parseInt(home?.score || "0", 10);
+                        const awayScore = parseInt(away?.score || "0", 10);
                         const matchupStr = `${awayAbbr} @ ${homeAbbr}`; 
+                        
+                        // Grab pre-calculated clock logic
+                        const gameClockStr = currentGameStates[homeAbbr]?.clock || "0:00";
                         
                         if (statusState === "in") {
                             globalActiveGame = true;
                         }
                         
-                        if (statusState === "in" || statusState === "post") {
-                            const clock = event.status?.displayClock || (statusState === "post" ? "Final" : "0:00");
-                            const period = event.status?.period || 1;
-                            
-                            // 1. Red Zone Detection
-                            const situation = competitions[0].situation || {};
-                            const isRedZone = situation.isRedZone;
-                            
-                            let rzClass = "bg-gray-800 border-gray-700";
-                            let rzBadge = "";
-                            
-                            if (isRedZone && statusState === "in") {
-                                globalRedZoneGame = true;
-                                rzClass = "bg-red-950/40 border-red-800/80 shadow-[0_0_8px_rgba(220,38,38,0.3)]";
-                                rzBadge = `<span class="text-[9px] bg-red-900/80 text-red-200 px-1 py-0.5 rounded mr-2 uppercase animate-pulse font-bold border border-red-700">🔴 RZ</span>`;
-                            }
+                        // 1. Red Zone Detection & Scoreboard Ticker
+                        const situation = competitions[0].situation || {};
+                        const isRedZone = situation.isRedZone;
+                        
+                        let rzClass = "bg-gray-800 border-gray-700";
+                        let rzBadge = "";
+                        let rzDot = "";
+                        
+                        if (isRedZone && statusState === "in") {
+                            globalRedZoneGame = true;
+                            rzClass = "bg-red-950/40 border-red-800/80 shadow-[0_0_8px_rgba(220,38,38,0.3)]";
+                            rzBadge = `<span class="text-[9px] bg-red-900/80 text-red-200 px-1 py-0.5 rounded mr-2 uppercase animate-pulse font-bold border border-red-700">🔴 RZ</span>`;
+                            rzDot = `<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0"></span>`;
+                        }
 
+                        // Push to Sidebar Scoreboard
+                        if (statusState === "in" || statusState === "post") {
                             let scoreDisplay = `<span class="font-semibold text-gray-200 text-xs">${awayAbbr} ${awayScore} @ ${homeAbbr} ${homeScore}</span>`;
                             if (teamLogos[awayAbbr] && teamLogos[homeAbbr]) {
                                 scoreDisplay = `<div class="flex items-center gap-1.5"><div class="flex items-center gap-1"><img src="${teamLogos[awayAbbr]}" class="w-4 h-4 md:w-5 md:h-5 object-contain" alt="${awayAbbr}"><span class="font-bold font-mono text-gray-200 w-4 text-right">${awayScore}</span></div><span class="text-gray-600 text-[9px] md:text-[10px]">@</span><div class="flex items-center gap-1"><span class="font-bold font-mono text-gray-200 w-4 text-right">${homeScore}</span><img src="${teamLogos[homeAbbr]}" class="w-4 h-4 md:w-5 md:h-5 object-contain" alt="${homeAbbr}"></div></div>`;
                             }
-                            activeGamesUI.push(`<div class="flex justify-between items-center p-2 rounded border ${rzClass} transition-colors duration-500">${scoreDisplay}<div class="flex items-center">${rzBadge}<span class="text-[9px] md:text-[10px] text-green-400 font-mono">${statusState === 'post' ? 'Final' : 'Q' + period + ' - ' + clock}</span></div></div>`);
+                            activeGamesUI.push(`<div class="flex justify-between items-center p-2 rounded border ${rzClass} transition-colors duration-500">${scoreDisplay}<div class="flex items-center">${rzBadge}<span class="text-[9px] md:text-[10px] text-green-400 font-mono">${gameClockStr}</span></div></div>`);
                         }
                         
+                        // Push to Header Ticker (Only Active Games)
+                        if (statusState === 'in') {
+                            let awayClass = (awayScore > homeScore) ? 'font-bold text-white' : '';
+                            let homeClass = (homeScore >= awayScore) ? 'font-bold text-white' : '';
+                            
+                            headerGamesUI.push(`
+                                <div class="flex items-center gap-1.5 px-2 py-1 bg-gray-900/80 border border-gray-700 rounded-md shrink-0 text-gray-200">
+                                    ${rzDot}
+                                    <img src="${teamLogos[awayAbbr] || ''}" class="w-3.5 h-3.5 object-contain">
+                                    <span class="${awayClass}">${awayAbbr} ${awayScore}</span> 
+                                    <span class="text-gray-600">@</span> 
+                                    <span class="${homeClass}">${homeAbbr} ${homeScore}</span>
+                                    <span class="text-gray-500 text-[9px] ml-1 tracking-tighter">[${gameClockStr}]</span>
+                                </div>
+                            `);
+                        }
+                        
+                        // Process Plays
                         if (statusState === "in" || statusState === "post") {
-                            const situation = competitions[0].situation || {};
                             const lastPlayText = situation.lastPlay?.text;
                             let downDistance = situation.downDistanceText || "";
                             
-                            // 2. Play Card Red Zone Indicator
-                            if (situation.isRedZone) {
+                            if (isRedZone) {
                                 downDistance = `<span class="text-red-400 font-bold animate-pulse">🔴 RZ</span> ` + (downDistance ? `<span class="mx-1 text-gray-600">•</span> ${downDistance}` : '');
                             }
                             
@@ -887,6 +967,7 @@
                 const activeContainer = document.getElementById('active-games-container');
                 activeContainer.innerHTML = activeGamesUI.length > 0 ? activeGamesUI.join('') : `<p class="text-[11px] md:text-xs text-gray-600 italic">No tracked games are currently active.</p>`;
                 
+                document.getElementById('header-games-ticker').innerHTML = headerGamesUI.length > 0 ? headerGamesUI.join('') : '';
                 document.getElementById('last-update').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
                 
                 updateGlobalStatus(globalActiveGame, globalRedZoneGame);
