@@ -45,21 +45,21 @@
     </div>
 
     <!-- Header -->
-    <header class="bg-gray-900 border-b border-gray-800 p-4 shrink-0 flex flex-col md:flex-row justify-between items-center gap-4 z-10 shadow-md">
+    <header class="bg-gray-900 border-b border-gray-800 p-3 md:p-4 shrink-0 flex flex-col md:flex-row justify-between items-center gap-3 z-10 shadow-md">
         <div class="flex items-center gap-3 w-full md:w-auto">
-            <div class="bg-blue-600 p-2 rounded-lg text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <div class="bg-blue-600 p-1.5 md:p-2 rounded-lg text-white">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             </div>
             <div>
-                <h1 class="text-xl font-bold text-white tracking-wide">League Dashboard</h1>
-                <p class="text-xs text-blue-400 font-medium" id="week-indicator">Week --</p>
+                <h1 class="text-lg md:text-xl font-bold text-white tracking-wide leading-tight">League Dashboard</h1>
+                <p class="text-[10px] md:text-xs text-blue-400 font-medium" id="week-indicator">Week --</p>
             </div>
         </div>
 
-        <div class="flex items-center gap-3 w-full md:w-auto">
-            <input type="text" id="username-input" class="bg-gray-950 text-sm text-white px-3 py-2 rounded-md border border-gray-700 focus:outline-none focus:border-blue-500 transition-colors w-full md:w-40" placeholder="Sleeper Username">
-            <button id="load-user-btn" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-md transition-colors shadow-sm">Load</button>
-            <select id="league-selector" class="bg-gray-950 text-sm text-white px-3 py-2 rounded-md border border-gray-700 hidden focus:outline-none focus:border-blue-500 cursor-pointer max-w-[200px] truncate">
+        <div class="flex items-center gap-2 w-full md:w-auto">
+            <input type="text" id="username-input" class="bg-gray-950 text-sm text-white px-3 py-1.5 md:py-2 rounded-md border border-gray-700 focus:outline-none focus:border-blue-500 transition-colors w-full md:w-40" placeholder="Sleeper Username">
+            <button id="load-user-btn" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-3 md:px-4 py-1.5 md:py-2 rounded-md transition-colors shadow-sm">Load</button>
+            <select id="league-selector" class="bg-gray-950 text-sm text-white px-3 py-1.5 md:py-2 rounded-md border border-gray-700 hidden focus:outline-none focus:border-blue-500 cursor-pointer max-w-[160px] md:max-w-[200px] truncate">
                 <!-- Populated dynamically -->
             </select>
         </div>
@@ -68,35 +68,36 @@
     <!-- Main Content Grid -->
     <main class="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0 bg-[#0a0f1c]">
         
-        <!-- Left Column: My Matchup Deep Dive -->
-        <section class="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r border-gray-800 relative min-h-0">
-            <div class="p-4 border-b border-gray-800 bg-gray-900/40 shrink-0 flex justify-between items-center backdrop-blur-sm">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span> My Matchup
+        <!-- Left Column: My Matchup Deep Dive (2 Columns) -->
+        <section class="flex-1 lg:flex-[3] flex flex-col border-b lg:border-b-0 lg:border-r border-gray-800 relative min-h-0">
+            <div class="p-3 md:p-4 border-b border-gray-800 bg-gray-900/40 shrink-0 flex justify-between items-center backdrop-blur-sm shadow-sm z-10">
+                <h2 class="text-sm md:text-lg font-bold text-white flex items-center gap-2 truncate">
+                    <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span> Head-to-Head
                 </h2>
-                <div id="matchup-margin" class="px-3 py-1 bg-gray-950 rounded-full text-xs font-bold border border-gray-800 text-gray-400">
+                <div id="matchup-margin" class="px-2 md:px-3 py-0.5 md:py-1 bg-gray-950 rounded-full text-[10px] md:text-xs font-bold border border-gray-800 text-gray-400 tracking-wider whitespace-nowrap">
                     Vs
                 </div>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-6" id="my-matchup-container">
-                <div class="flex h-full items-center justify-center text-gray-500 italic text-sm">
+            <div class="flex-1 overflow-hidden p-2 md:p-4 flex gap-2 md:gap-4" id="my-matchup-container">
+                <!-- Injected via JS -->
+                <div class="flex w-full h-full items-center justify-center text-gray-500 italic text-sm">
                     Select a league to view your matchup.
                 </div>
             </div>
         </section>
 
         <!-- Right Column: League Scoreboard -->
-        <section class="flex-1 flex flex-col relative min-h-0 lg:max-w-xl xl:max-w-2xl bg-gray-950">
-            <div class="p-4 border-b border-gray-800 bg-gray-900/40 shrink-0 flex justify-between items-center backdrop-blur-sm">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+        <section class="flex-1 lg:flex-[2] flex flex-col relative min-h-0 bg-gray-950">
+            <div class="p-3 md:p-4 border-b border-gray-800 bg-gray-900/40 shrink-0 flex justify-between items-center backdrop-blur-sm shadow-sm z-10">
+                <h2 class="text-sm md:text-lg font-bold text-white flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-blue-500"></span> League Scoreboard
                 </h2>
-                <span class="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded-md" id="league-update-time">Updates every 30s</span>
+                <span class="text-[9px] md:text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded-md" id="league-update-time">Waiting...</span>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-4 md:p-6" id="league-scoreboard-container">
-                <div class="grid grid-cols-1 gap-4" id="league-matchups-grid">
+            <div class="flex-1 overflow-y-auto p-3 md:p-5" id="league-scoreboard-container">
+                <div class="grid grid-cols-1 gap-3 md:gap-4" id="league-matchups-grid">
                     <!-- Scoreboard Cards Injected Here -->
                 </div>
             </div>
@@ -113,11 +114,20 @@
         let CURRENT_NFL_WEEK = null;
         let CURRENT_NFL_SEASON = null;
         let CURRENT_LEAGUE_ID = null;
+        
+        let LEAGUE_POSITIONS = [];
         let WEEKLY_PROJECTIONS = {};
         let SLEEPER_PLAYERS_DB = null;
         
-        // Polling interval
+        let CURRENT_MATCHUPS = [];
+        let CURRENT_ROSTERS = [];
+        let CURRENT_USERS = [];
+        
+        // Polling logic for both ESPN and Sleeper
+        let TARGET_TEAMS = new Set();
+        let currentGameStates = {};
         let matchupInterval = null;
+        let espnInterval = null;
 
         // --- UI UTILITIES ---
         function showLoading(msg) {
@@ -180,9 +190,8 @@
             showLoading("Extracting league data...");
             CURRENT_LEAGUE_ID = leagueId;
             
-            if (matchupInterval) {
-                clearInterval(matchupInterval);
-            }
+            if (matchupInterval) clearInterval(matchupInterval);
+            if (espnInterval) clearInterval(espnInterval);
 
             try {
                 // Fetch projections if needed
@@ -199,10 +208,21 @@
                     SLEEPER_PLAYERS_DB = await playersRes.json();
                 }
 
-                await fetchAndRenderDashboard();
+                // Fetch Static League Data
+                const leagueRes = await fetch(`https://api.sleeper.app/v1/league/${CURRENT_LEAGUE_ID}`);
+                const leagueData = await leagueRes.json();
+                LEAGUE_POSITIONS = leagueData.roster_positions || [];
+
+                CURRENT_ROSTERS = await (await fetch(`https://api.sleeper.app/v1/league/${CURRENT_LEAGUE_ID}/rosters`)).json();
+                CURRENT_USERS = await (await fetch(`https://api.sleeper.app/v1/league/${CURRENT_LEAGUE_ID}/users`)).json();
+
+                // Initial Data Pulls
+                await fetchSleeperMatchups();
+                await fetchEspnData();
                 
-                // Poll Sleeper every 30 seconds for live score updates
-                matchupInterval = setInterval(fetchAndRenderDashboard, 30000);
+                // Set up polling intervals (Sleeper every 30s, ESPN every 10s)
+                matchupInterval = setInterval(fetchSleeperMatchups, 30000);
+                espnInterval = setInterval(fetchEspnData, 10000);
 
                 hideLoading();
             } catch(e) {
@@ -212,264 +232,308 @@
             }
         }
 
-        async function fetchAndRenderDashboard() {
+        async function fetchSleeperMatchups() {
             if (!CURRENT_LEAGUE_ID) return;
-
             try {
-                // 1. Fetch League Data (for roster positions)
-                const leagueRes = await fetch(`https://api.sleeper.app/v1/league/${CURRENT_LEAGUE_ID}`);
-                const leagueData = await leagueRes.json();
-                const rosterPositions = leagueData.roster_positions || [];
+                const res = await fetch(`https://api.sleeper.app/v1/league/${CURRENT_LEAGUE_ID}/matchups/${CURRENT_NFL_WEEK}`);
+                CURRENT_MATCHUPS = await res.json();
+                
+                renderLeagueScoreboard();
+                renderMatchupCols();
+                
+                document.getElementById('league-update-time').innerText = `Updated: ${new Date().toLocaleTimeString()}`;
+            } catch (e) {
+                console.warn("Sleeper fetch error:", e);
+            }
+        }
 
-                // 2. Fetch Rosters (to map roster_id to owner_id)
-                const rostersRes = await fetch(`https://api.sleeper.app/v1/league/${CURRENT_LEAGUE_ID}/rosters`);
-                const rosters = await rostersRes.json();
-
-                // 3. Fetch Users (to map owner_id to team name/avatar)
-                const usersRes = await fetch(`https://api.sleeper.app/v1/league/${CURRENT_LEAGUE_ID}/users`);
-                const usersData = await usersRes.json();
-
-                // Build a quick lookup dictionary for team info
-                const teamInfo = {};
-                rosters.forEach(r => {
-                    const user = usersData.find(u => u.user_id === r.owner_id);
-                    let name = "Empty Roster";
-                    let avatar = "https://sleepercdn.com/images/v2/icons/player_default.webp";
-                    if (user) {
-                        name = user.metadata?.team_name || user.display_name;
-                        if (user.avatar) {
-                            avatar = `https://sleepercdn.com/avatars/thumbs/${user.avatar}`;
-                        }
-                    }
-                    teamInfo[r.roster_id] = { name, avatar, owner_id: r.owner_id, roster: r };
-                });
-
-                // 4. Fetch Matchups (Live Scores & Lineups)
-                const matchupsRes = await fetch(`https://api.sleeper.app/v1/league/${CURRENT_LEAGUE_ID}/matchups/${CURRENT_NFL_WEEK}`);
-                const matchups = await matchupsRes.json();
-
-                // Group Matchups by matchup_id
-                const groupedMatchups = {};
-                let myMatchupId = null;
-
-                matchups.forEach(m => {
-                    if (!groupedMatchups[m.matchup_id]) {
-                        groupedMatchups[m.matchup_id] = [];
-                    }
-                    groupedMatchups[m.matchup_id].push(m);
-
-                    const tInfo = teamInfo[m.roster_id];
-                    if (tInfo && tInfo.owner_id === SLEEPER_USER_ID) {
-                        myMatchupId = m.matchup_id;
-                    }
-                });
-
-                // Helper: Calculate active points
-                const calculatePoints = (matchup) => {
-                    let actual = 0;
-                    let proj = 0;
+        async function fetchEspnData() {
+            if (TARGET_TEAMS.size === 0) return;
+            try {
+                const response = await fetch("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard");
+                if (!response.ok) return;
+                const data = await response.json();
+                
+                currentGameStates = {};
+                (data.events || []).forEach(event => {
+                    const comps = event.competitions || [];
+                    if (!comps.length) return;
                     
-                    if (!matchup || !matchup.starters) return { actual: 0, proj: 0 };
+                    const tState = event.status?.type?.state;
+                    let tClock = event.status?.displayClock || (tState === "post" ? "Final" : "0:00");
+                    const tPeriod = event.status?.period || 1;
                     
-                    matchup.starters.forEach(playerId => {
-                        if (playerId === "0") return; // Empty slot
-                        
-                        // Actual
-                        if (matchup.players_points && matchup.players_points[playerId]) {
-                            actual += matchup.players_points[playerId];
-                        }
-                        
-                        // Projected
-                        const pObj = WEEKLY_PROJECTIONS[CURRENT_NFL_WEEK]?.[playerId];
-                        if (pObj) {
-                            proj += pObj.pts_ppr ?? pObj.pts_half_ppr ?? pObj.pts_std ?? 
-                                    pObj.stats?.pts_ppr ?? pObj.stats?.pts_half_ppr ?? pObj.stats?.pts_std ?? 0;
+                    if (tState === 'pre') tClock = 'Pregame';
+                    else if (tState === 'in') tClock = `Q${tPeriod} ${tClock}`;
+                    else tClock = 'Final';
+                    
+                    const isRz = comps[0].situation?.isRedZone || false;
+                    
+                    comps[0].competitors?.forEach(c => {
+                        if (c.team?.abbreviation) {
+                            currentGameStates[c.team.abbreviation] = { state: tState, clock: tClock, isRedZone: isRz };
                         }
                     });
-                    
-                    return { actual, proj };
-                };
+                });
+                
+                // Re-render only the matchup columns to immediately show updated clocks / RZ states
+                renderMatchupCols();
+            } catch (e) {
+                console.warn("ESPN fetch error:", e);
+            }
+        }
 
-                // === RENDER LEAGUE SCOREBOARD ===
-                const scoreboardGrid = document.getElementById('league-matchups-grid');
-                let scoreboardHTML = '';
+        // --- RENDERING PIPELINE ---
 
-                Object.keys(groupedMatchups).forEach(mId => {
-                    const teams = groupedMatchups[mId];
-                    if (teams.length !== 2) return; // Ignore incomplete matchups or bye weeks for now
+        function renderLeagueScoreboard() {
+            if (!CURRENT_MATCHUPS.length || !CURRENT_ROSTERS.length) return;
 
-                    const team1 = teams[0];
-                    const team2 = teams[1];
-                    
-                    const info1 = teamInfo[team1.roster_id];
-                    const info2 = teamInfo[team2.roster_id];
-                    
-                    const pts1 = calculatePoints(team1);
-                    const pts2 = calculatePoints(team2);
-                    
-                    const isMyMatchup = (mId == myMatchupId);
-                    const borderClass = isMyMatchup ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-gray-800 hover:border-gray-700';
-                    const bgClass = isMyMatchup ? 'bg-gray-900/80' : 'bg-gray-900/50';
+            const teamInfo = {};
+            CURRENT_ROSTERS.forEach(r => {
+                const user = CURRENT_USERS.find(u => u.user_id === r.owner_id);
+                let name = "Empty Roster";
+                let avatar = "https://sleepercdn.com/images/v2/icons/player_default.webp";
+                if (user) {
+                    name = user.metadata?.team_name || user.display_name;
+                    if (user.avatar) avatar = `https://sleepercdn.com/avatars/thumbs/${user.avatar}`;
+                }
+                teamInfo[r.roster_id] = { name, avatar, owner_id: r.owner_id };
+            });
 
-                    scoreboardHTML += `
-                        <div class="rounded-xl border ${borderClass} ${bgClass} p-4 flex flex-col gap-3 transition-colors">
-                            ${isMyMatchup ? '<div class="text-[10px] uppercase font-bold tracking-widest text-blue-400 mb-1">Your Matchup</div>' : ''}
-                            
-                            <!-- Team 1 -->
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3 overflow-hidden">
-                                    <img src="${info1.avatar}" class="w-8 h-8 rounded-full bg-gray-800 shrink-0 border border-gray-700 object-cover" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                                    <span class="font-semibold text-gray-200 truncate ${pts1.actual > pts2.actual ? 'text-white' : ''}">${info1.name}</span>
-                                </div>
-                                <div class="text-right shrink-0 ml-4">
-                                    <div class="text-lg font-bold font-mono ${pts1.actual > pts2.actual ? 'text-white' : 'text-gray-400'}">${pts1.actual.toFixed(2)}</div>
-                                    <div class="text-[10px] text-gray-500 font-mono">Proj: ${pts1.proj.toFixed(2)}</div>
+            const groupedMatchups = {};
+            let myMatchupId = null;
+
+            CURRENT_MATCHUPS.forEach(m => {
+                if (!groupedMatchups[m.matchup_id]) groupedMatchups[m.matchup_id] = [];
+                groupedMatchups[m.matchup_id].push(m);
+
+                if (teamInfo[m.roster_id]?.owner_id === SLEEPER_USER_ID) {
+                    myMatchupId = m.matchup_id;
+                }
+            });
+
+            const calculatePoints = (matchup) => {
+                let actual = 0, proj = 0;
+                if (!matchup || !matchup.starters) return { actual, proj };
+                matchup.starters.forEach(pid => {
+                    if (pid === "0") return;
+                    actual += (matchup.players_points?.[pid] || 0);
+                    const pObj = WEEKLY_PROJECTIONS[CURRENT_NFL_WEEK]?.[pid];
+                    if (pObj) proj += pObj.pts_ppr ?? pObj.pts_half_ppr ?? pObj.pts_std ?? 0;
+                });
+                return { actual, proj };
+            };
+
+            const scoreboardGrid = document.getElementById('league-matchups-grid');
+            let scoreboardHTML = '';
+
+            Object.keys(groupedMatchups).forEach(mId => {
+                const teams = groupedMatchups[mId];
+                if (teams.length !== 2) return;
+
+                const team1 = teams[0];
+                const team2 = teams[1];
+                
+                const info1 = teamInfo[team1.roster_id];
+                const info2 = teamInfo[team2.roster_id];
+                const pts1 = calculatePoints(team1);
+                const pts2 = calculatePoints(team2);
+                
+                const isMyMatchup = (mId == myMatchupId);
+                const borderClass = isMyMatchup ? 'border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.15)]' : 'border-gray-800 hover:border-gray-700';
+                const bgClass = isMyMatchup ? 'bg-gray-900/90' : 'bg-gray-900/40';
+
+                scoreboardHTML += `
+                    <div class="rounded-xl border ${borderClass} ${bgClass} p-3 md:p-4 flex flex-col gap-2.5 transition-colors">
+                        ${isMyMatchup ? '<div class="text-[9px] uppercase font-bold tracking-widest text-blue-400 mb-0.5">Your Matchup</div>' : ''}
+                        
+                        <!-- Team 1 -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5 overflow-hidden">
+                                <img src="${info1.avatar}" class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-800 shrink-0 border border-gray-700 object-cover" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
+                                <span class="font-semibold text-xs md:text-sm truncate ${pts1.actual > pts2.actual ? 'text-white' : 'text-gray-300'}">${info1.name}</span>
+                            </div>
+                            <div class="text-right shrink-0 ml-3">
+                                <div class="text-base md:text-lg font-bold font-mono leading-tight ${pts1.actual > pts2.actual ? 'text-white' : 'text-gray-400'}">${pts1.actual.toFixed(2)}</div>
+                                <div class="text-[9px] md:text-[10px] text-gray-500 font-mono tracking-tighter">Proj ${pts1.proj.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full h-px bg-gray-800/60 my-0.5"></div>
+                        
+                        <!-- Team 2 -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5 overflow-hidden">
+                                <img src="${info2.avatar}" class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-800 shrink-0 border border-gray-700 object-cover" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
+                                <span class="font-semibold text-xs md:text-sm truncate ${pts2.actual > pts1.actual ? 'text-white' : 'text-gray-300'}">${info2.name}</span>
+                            </div>
+                            <div class="text-right shrink-0 ml-3">
+                                <div class="text-base md:text-lg font-bold font-mono leading-tight ${pts2.actual > pts1.actual ? 'text-white' : 'text-gray-400'}">${pts2.actual.toFixed(2)}</div>
+                                <div class="text-[9px] md:text-[10px] text-gray-500 font-mono tracking-tighter">Proj ${pts2.proj.toFixed(2)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            scoreboardGrid.innerHTML = scoreboardHTML;
+        }
+
+        function renderMatchupCols() {
+            if (!CURRENT_MATCHUPS.length || !CURRENT_ROSTERS.length) return;
+            
+            const myRoster = CURRENT_ROSTERS.find(r => r.owner_id === SLEEPER_USER_ID);
+            if (!myRoster) return;
+            
+            const myMatchup = CURRENT_MATCHUPS.find(m => m.roster_id === myRoster.roster_id);
+            if (!myMatchup) return;
+            
+            const oppMatchup = CURRENT_MATCHUPS.find(m => m.matchup_id === myMatchup.matchup_id && m.roster_id !== myRoster.roster_id);
+            const oppRoster = CURRENT_ROSTERS.find(r => r.roster_id === (oppMatchup?.roster_id)) || {};
+            
+            TARGET_TEAMS.clear();
+
+            const buildCol = (matchup, roster, isMe) => {
+                if (!matchup) {
+                    return { html: `<div class="flex-1 flex flex-col min-w-0 bg-gray-900 border border-gray-800 rounded-lg"><div class="p-4 text-center text-gray-500 italic text-xs">No Opponent</div></div>`, actual: 0 };
+                }
+                
+                let name = "Empty";
+                let avatar = "https://sleepercdn.com/images/v2/icons/player_default.webp";
+                const user = CURRENT_USERS.find(u => u.user_id === roster.owner_id);
+                if (user) {
+                    name = user.metadata?.team_name || user.display_name;
+                    if (user.avatar) avatar = `https://sleepercdn.com/avatars/thumbs/${user.avatar}`;
+                }
+                
+                // Calculate Pts
+                let actual = 0, proj = 0;
+                matchup.starters.forEach(pid => {
+                    if (pid !== "0") {
+                        actual += (matchup.players_points?.[pid] || 0);
+                        const pObj = WEEKLY_PROJECTIONS[CURRENT_NFL_WEEK]?.[pid];
+                        if (pObj) proj += pObj.pts_ppr ?? pObj.pts_half_ppr ?? pObj.stats?.pts_ppr ?? 0;
+                    }
+                });
+                
+                let html = `
+                    <div class="flex-1 flex flex-col min-w-0 h-full">
+                        <!-- Column Header -->
+                        <div class="flex items-center justify-between p-2 md:p-3 bg-gray-900 border ${isMe ? 'border-blue-900/50' : 'border-gray-800'} border-b-0 rounded-t-lg shrink-0 z-10 shadow-sm">
+                            <div class="flex items-center gap-2 md:gap-3 overflow-hidden">
+                                <img src="${avatar}" class="w-7 h-7 md:w-9 md:h-9 rounded-full border border-gray-700 object-cover shrink-0">
+                                <div class="min-w-0">
+                                    <h3 class="font-bold text-gray-200 text-xs md:text-sm truncate leading-tight">${name}</h3>
+                                    <p class="text-[8px] md:text-[9px] text-gray-500 uppercase tracking-widest">${isMe ? 'My Team' : 'Opponent'}</p>
                                 </div>
                             </div>
-                            
-                            <div class="w-full h-px bg-gray-800/60 my-1"></div>
-                            
-                            <!-- Team 2 -->
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3 overflow-hidden">
-                                    <img src="${info2.avatar}" class="w-8 h-8 rounded-full bg-gray-800 shrink-0 border border-gray-700 object-cover" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                                    <span class="font-semibold text-gray-200 truncate ${pts2.actual > pts1.actual ? 'text-white' : ''}">${info2.name}</span>
+                            <div class="text-right shrink-0 pl-2">
+                                <div class="text-sm md:text-lg font-bold font-mono ${isMe ? 'text-blue-400' : 'text-red-400'} leading-none">${actual.toFixed(2)}</div>
+                                <div class="text-[8px] md:text-[9px] text-gray-500 font-mono tracking-tight mt-0.5">Proj ${proj.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Roster Area -->
+                        <div class="flex-1 overflow-y-auto bg-gray-900/30 border ${isMe ? 'border-blue-900/30' : 'border-gray-800'} rounded-b-lg p-1.5 md:p-2 space-y-1.5 no-scrollbar">
+                `;
+                
+                const activePos = LEAGUE_POSITIONS.filter(p => p !== 'BN');
+                
+                const renderPlayerRow = (pid, posLabel) => {
+                    if (pid === "0") {
+                        return `
+                        <div class="flex items-center gap-1.5 p-1.5 md:p-2 rounded bg-gray-950/40 border border-gray-800/40">
+                            <div class="text-[9px] md:text-[10px] font-bold text-gray-600 w-6 md:w-8 shrink-0 text-right pr-1.5 border-r border-gray-800 uppercase tracking-wider">${posLabel}</div>
+                            <div class="text-[10px] md:text-[11px] text-gray-600 italic">Empty Slot</div>
+                        </div>`;
+                    }
+                    
+                    const pData = SLEEPER_PLAYERS_DB[pid];
+                    let pName = pid;
+                    let pTeam = "";
+                    
+                    if (pid.length <= 4 && isNaN(parseInt(pid))) {
+                        pName = `${pid} DEF`; pTeam = pid;
+                    } else if (pData) {
+                        pName = pData.last_name ? `${pData.first_name.charAt(0)}. ${pData.last_name}` : pData.first_name;
+                        pTeam = pData.team || "FA";
+                    }
+                    
+                    if (pTeam && pTeam !== "FA") TARGET_TEAMS.add(pTeam);
+                    
+                    const tData = currentGameStates[pTeam];
+                    const state = tData?.state;
+                    const clock = tData?.clock || "Pregame";
+                    const isRz = tData?.isRedZone;
+                    
+                    let bgClass = "bg-gray-800/30 border-gray-700/40 hover:bg-gray-800/60";
+                    let clockHtml = `<span class="text-gray-500">${pTeam} • ${clock}</span>`;
+                    
+                    if (state === "in") {
+                        bgClass = isRz ? "bg-red-950/40 border-red-800/50" : "bg-green-950/20 border-green-800/30";
+                        clockHtml = `<span class="${isRz ? 'text-red-400 font-bold animate-pulse' : 'text-green-400'}">${pTeam} • ${clock}</span>`;
+                    } else if (state === "post") {
+                        bgClass = "bg-gray-900/70 border-gray-800/50 opacity-75";
+                    }
+                    
+                    const pPts = (matchup.players_points?.[pid] || 0).toFixed(1);
+                    
+                    return `
+                        <div class="flex items-center justify-between gap-2 p-1.5 md:p-2 rounded border ${bgClass} transition-colors">
+                            <div class="flex items-center gap-1.5 md:gap-2 overflow-hidden flex-1 min-w-0">
+                                <div class="text-[9px] md:text-[10px] font-bold ${isMe ? 'text-blue-500/80' : 'text-gray-500'} w-6 md:w-8 shrink-0 text-right pr-1.5 border-r border-gray-700/50 uppercase tracking-wider">${posLabel}</div>
+                                <div class="flex flex-col justify-center min-w-0 overflow-hidden">
+                                    <div class="text-[10px] md:text-xs font-semibold text-gray-200 truncate leading-tight">${pName}</div>
+                                    <div class="text-[8px] md:text-[9px] font-mono tracking-tighter truncate mt-0.5">${clockHtml}</div>
                                 </div>
-                                <div class="text-right shrink-0 ml-4">
-                                    <div class="text-lg font-bold font-mono ${pts2.actual > pts1.actual ? 'text-white' : 'text-gray-400'}">${pts2.actual.toFixed(2)}</div>
-                                    <div class="text-[10px] text-gray-500 font-mono">Proj: ${pts2.proj.toFixed(2)}</div>
-                                </div>
+                            </div>
+                            <div class="text-right shrink-0 pl-1">
+                                <div class="text-[11px] md:text-sm font-bold font-mono text-gray-100 leading-none">${pPts}</div>
                             </div>
                         </div>
                     `;
+                };
+                
+                // Starters
+                matchup.starters.forEach((pid, idx) => {
+                    html += renderPlayerRow(pid, activePos[idx] || 'FLX');
                 });
                 
-                scoreboardGrid.innerHTML = scoreboardHTML;
-
-                // === RENDER MY MATCHUP DEEP DIVE ===
-                const myMatchupContainer = document.getElementById('my-matchup-container');
-                const marginEl = document.getElementById('matchup-margin');
+                // Bench Divider
+                html += `<div class="text-[8px] md:text-[9px] font-bold text-gray-600 uppercase tracking-widest text-center mt-3 mb-1 border-b border-gray-800/50 pb-1">Bench & IR</div>`;
                 
-                if (myMatchupId && groupedMatchups[myMatchupId].length === 2) {
-                    const mTeams = groupedMatchups[myMatchupId];
-                    let myM = mTeams.find(m => teamInfo[m.roster_id].owner_id === SLEEPER_USER_ID);
-                    let oppM = mTeams.find(m => teamInfo[m.roster_id].owner_id !== SLEEPER_USER_ID);
-                    
-                    if(!myM) myM = mTeams[0]; // fallback
-                    if(!oppM) oppM = mTeams[1];
-                    
-                    const myInfo = teamInfo[myM.roster_id];
-                    const oppInfo = teamInfo[oppM.roster_id];
-                    const myPts = calculatePoints(myM);
-                    const oppPts = calculatePoints(oppM);
-                    
-                    // Update Margin
-                    const diff = myPts.actual - oppPts.actual;
-                    if (myPts.actual === 0 && oppPts.actual === 0) {
-                        marginEl.innerHTML = `Tied`;
-                    } else if (diff > 0) {
-                        marginEl.innerHTML = `<span class="text-green-400">Winning by ${diff.toFixed(2)}</span>`;
-                    } else if (diff < 0) {
-                        marginEl.innerHTML = `<span class="text-red-400">Losing by ${Math.abs(diff).toFixed(2)}</span>`;
-                    } else {
-                        marginEl.innerHTML = `<span class="text-gray-400">Tied</span>`;
-                    }
-
-                    // Build Player Roster HTML
-                    const renderPlayerLineup = (matchup, info, isMe) => {
-                        const activePos = rosterPositions.filter(p => p !== 'BN');
-                        
-                        let html = `
-                            <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden shadow-lg mb-6">
-                                <!-- Header -->
-                                <div class="p-4 border-b border-gray-800 flex items-center justify-between ${isMe ? 'bg-blue-900/20' : 'bg-red-900/10'}">
-                                    <div class="flex items-center gap-3 overflow-hidden">
-                                        <img src="${info.avatar}" class="w-10 h-10 rounded-full border border-gray-700 object-cover shrink-0" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                                        <div class="truncate">
-                                            <h3 class="font-bold text-white text-base truncate">${info.name}</h3>
-                                            <p class="text-xs ${isMe ? 'text-blue-400' : 'text-red-400'} uppercase tracking-wide font-semibold">${isMe ? 'My Team' : 'Opponent'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="text-right shrink-0 pl-3">
-                                        <div class="text-2xl font-bold font-mono text-white leading-none mb-1">${calculatePoints(matchup).actual.toFixed(2)}</div>
-                                        <div class="text-xs text-gray-400 font-mono tracking-tighter">Proj: ${calculatePoints(matchup).proj.toFixed(2)}</div>
-                                    </div>
-                                </div>
-                                <!-- Starters -->
-                                <div class="p-3 flex flex-col gap-1.5">
-                        `;
-                        
-                        // Render Starters
-                        matchup.starters.forEach((playerId, idx) => {
-                            const pos = activePos[idx] || 'FLEX';
-                            
-                            if (playerId === "0") {
-                                html += `
-                                    <div class="flex items-center gap-3 p-2 rounded bg-gray-950/50 border border-gray-800/50">
-                                        <div class="text-[10px] font-bold text-gray-600 w-10 shrink-0 text-right pr-2 border-r border-gray-800">${pos}</div>
-                                        <div class="text-sm text-gray-600 italic">Empty Slot</div>
-                                    </div>
-                                `;
-                                return;
-                            }
-                            
-                            const pData = SLEEPER_PLAYERS_DB[playerId];
-                            let pName = playerId;
-                            let pPos = pos;
-                            let pTeam = "";
-                            let pImg = `https://sleepercdn.com/content/nfl/players/thumb/${playerId}.jpg`;
-                            
-                            if (playerId.length <= 4 && isNaN(parseInt(playerId))) {
-                                // Defense
-                                pName = `${playerId} Defense`;
-                                pTeam = playerId;
-                                pImg = `https://sleepercdn.com/images/team_logos/nfl/${playerId.toLowerCase()}.png`;
-                            } else if (pData) {
-                                pName = `${pData.first_name} ${pData.last_name}`;
-                                pTeam = pData.team || "FA";
-                            }
-                            
-                            const actualPts = matchup.players_points ? (matchup.players_points[playerId] || 0) : 0;
-                            
-                            let projPts = 0;
-                            const projObj = WEEKLY_PROJECTIONS[CURRENT_NFL_WEEK]?.[playerId];
-                            if (projObj) {
-                                projPts = projObj.pts_ppr ?? projObj.pts_half_ppr ?? projObj.pts_std ?? 
-                                          projObj.stats?.pts_ppr ?? projObj.stats?.pts_half_ppr ?? projObj.stats?.pts_std ?? 0;
-                            }
-                            
-                            html += `
-                                <div class="flex items-center gap-2 md:gap-3 p-2 rounded bg-gray-800/40 border border-gray-700/50 hover:bg-gray-800/70 transition-colors">
-                                    <div class="text-[10px] font-bold ${isMe ? 'text-blue-400/80' : 'text-gray-500'} w-8 md:w-10 shrink-0 text-right pr-2 border-r border-gray-700/50">${pos}</div>
-                                    <div class="w-8 h-8 md:w-10 md:h-10 shrink-0 bg-gray-900 rounded-full border border-gray-700 overflow-hidden flex items-center justify-center">
-                                        <img src="${pImg}" class="w-full h-full object-cover" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="font-semibold text-gray-200 text-sm truncate">${pName}</div>
-                                        <div class="text-[10px] text-gray-500 tracking-wider">${pTeam}</div>
-                                    </div>
-                                    <div class="text-right shrink-0">
-                                        <div class="text-sm md:text-base font-bold font-mono text-white">${actualPts.toFixed(2)}</div>
-                                        <div class="text-[9px] md:text-[10px] text-gray-500 font-mono tracking-tighter">Proj ${projPts.toFixed(2)}</div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        
-                        html += `</div></div>`;
-                        return html;
-                    };
-
-                    myMatchupContainer.innerHTML = renderPlayerLineup(myM, myInfo, true) + renderPlayerLineup(oppM, oppInfo, false);
-
-                } else {
-                    myMatchupContainer.innerHTML = `<div class="flex h-full items-center justify-center text-gray-500 italic">Could not load matchup details.</div>`;
-                }
-
-                document.getElementById('league-update-time').innerText = `Updated: ${new Date().toLocaleTimeString()}`;
-
-            } catch (error) {
-                console.warn("Dashboard fetch warning:", error);
+                // Bench
+                const benchIds = matchup.players.filter(id => !matchup.starters.includes(id));
+                benchIds.forEach(pid => {
+                    const posLabel = (roster.reserve && roster.reserve.includes(pid)) ? 'IR' : 'BN';
+                    html += renderPlayerRow(pid, posLabel);
+                });
+                
+                html += `</div></div>`;
+                return { html, actual };
+            };
+            
+            const myData = buildCol(myMatchup, myRoster, true);
+            const oppData = buildCol(oppMatchup, oppRoster, false);
+            
+            // Build the wrapping container dynamically to ensure pure two columns
+            document.getElementById('my-matchup-container').innerHTML = `
+                <div class="flex-1 flex flex-col min-w-0">${myData.html}</div>
+                <div class="flex-1 flex flex-col min-w-0">${oppData.html}</div>
+            `;
+            
+            // Update Margin indicator in header
+            const marginEl = document.getElementById('matchup-margin');
+            const diff = myData.actual - (oppData.actual || 0);
+            
+            if (myData.actual === 0 && (!oppData.actual || oppData.actual === 0)) {
+                marginEl.innerHTML = `0.00 - 0.00`;
+            } else if (diff > 0) {
+                marginEl.innerHTML = `<span class="text-green-400 drop-shadow-sm">Up ${diff.toFixed(2)}</span>`;
+            } else if (diff < 0) {
+                marginEl.innerHTML = `<span class="text-red-400 drop-shadow-sm">Down ${Math.abs(diff).toFixed(2)}</span>`;
+            } else {
+                marginEl.innerHTML = `<span class="text-gray-400">Tied</span>`;
             }
         }
 
