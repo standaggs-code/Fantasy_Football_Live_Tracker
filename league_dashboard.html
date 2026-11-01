@@ -443,7 +443,7 @@
                     if (pid === "0") {
                         return `
                         <div class="flex items-center gap-1.5 p-1.5 md:p-2 rounded bg-gray-950/40 border border-gray-800/40">
-                            <div class="text-[9px] md:text-[10px] font-bold text-gray-600 w-6 md:w-8 shrink-0 text-right pr-1.5 border-r border-gray-800 uppercase tracking-wider">${posLabel}</div>
+                            <div class="text-[9px] md:text-[10px] font-bold text-gray-600 w-10 md:w-12 shrink-0 text-right pr-1.5 border-r border-gray-800 uppercase tracking-wider">${posLabel === 'SUPER_FLEX' ? 'S-FLX' : posLabel}</div>
                             <div class="text-[10px] md:text-[11px] text-gray-600 italic">Empty Slot</div>
                         </div>`;
                     }
@@ -481,7 +481,7 @@
                     return `
                         <div class="flex items-center justify-between gap-2 p-1.5 md:p-2 rounded border ${bgClass} transition-colors">
                             <div class="flex items-center gap-1.5 md:gap-2 overflow-hidden flex-1 min-w-0">
-                                <div class="text-[9px] md:text-[10px] font-bold ${isMe ? 'text-blue-500/80' : 'text-gray-500'} w-6 md:w-8 shrink-0 text-right pr-1.5 border-r border-gray-700/50 uppercase tracking-wider">${posLabel}</div>
+                                <div class="text-[9px] md:text-[10px] font-bold ${isMe ? 'text-blue-500/80' : 'text-gray-500'} w-10 md:w-12 shrink-0 text-right pr-1.5 border-r border-gray-700/50 uppercase tracking-wider">${posLabel === 'SUPER_FLEX' ? 'S-FLX' : posLabel}</div>
                                 <div class="flex flex-col justify-center min-w-0 overflow-hidden">
                                     <div class="text-[10px] md:text-xs font-semibold text-gray-200 truncate leading-tight">${pName}</div>
                                     <div class="text-[8px] md:text-[9px] font-mono tracking-tighter truncate mt-0.5">${clockHtml}</div>
