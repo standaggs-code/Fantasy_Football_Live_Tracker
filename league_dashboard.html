@@ -97,7 +97,7 @@
             </div>
             
             <div class="flex-1 overflow-y-auto p-3 md:p-5" id="league-scoreboard-container">
-                <div class="grid grid-cols-1 gap-3 md:gap-4" id="league-matchups-grid">
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-2 md:gap-3" id="league-matchups-grid">
                     <!-- Scoreboard Cards Injected Here -->
                 </div>
             </div>
@@ -344,18 +344,18 @@
                 const bgClass = isMyMatchup ? 'bg-gray-900/90' : 'bg-gray-900/40';
 
                 scoreboardHTML += `
-                    <div class="rounded-xl border ${borderClass} ${bgClass} p-3 md:p-4 flex flex-col gap-2.5 transition-colors">
-                        ${isMyMatchup ? '<div class="text-[9px] uppercase font-bold tracking-widest text-blue-400 mb-0.5">Your Matchup</div>' : ''}
+                    <div class="rounded-lg border ${borderClass} ${bgClass} p-2 flex flex-col gap-1.5 transition-colors shadow-sm">
+                        ${isMyMatchup ? '<div class="text-[8px] uppercase font-bold tracking-widest text-blue-400 mb-0.5">Your Matchup</div>' : ''}
                         
                         <!-- Team 1 -->
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2.5 overflow-hidden">
-                                <img src="${info1.avatar}" class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-800 shrink-0 border border-gray-700 object-cover" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                                <span class="font-semibold text-xs md:text-sm truncate ${pts1.actual > pts2.actual ? 'text-white' : 'text-gray-300'}">${info1.name}</span>
+                            <div class="flex items-center gap-2 overflow-hidden">
+                                <img src="${info1.avatar}" class="w-6 h-6 rounded-full bg-gray-800 shrink-0 border border-gray-700 object-cover" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
+                                <span class="font-semibold text-xs truncate ${pts1.actual > pts2.actual ? 'text-white' : 'text-gray-400'}">${info1.name}</span>
                             </div>
-                            <div class="text-right shrink-0 ml-3">
-                                <div class="text-base md:text-lg font-bold font-mono leading-tight ${pts1.actual > pts2.actual ? 'text-white' : 'text-gray-400'}">${pts1.actual.toFixed(2)}</div>
-                                <div class="text-[9px] md:text-[10px] text-gray-500 font-mono tracking-tighter">Proj ${pts1.proj.toFixed(2)}</div>
+                            <div class="text-right shrink-0 ml-2 flex items-center gap-2">
+                                <div class="text-[9px] text-gray-600 font-mono hidden 2xl:block tracking-tighter">Proj ${pts1.proj.toFixed(1)}</div>
+                                <div class="text-sm font-bold font-mono leading-none ${pts1.actual > pts2.actual ? 'text-white' : 'text-gray-500'}">${pts1.actual.toFixed(2)}</div>
                             </div>
                         </div>
                         
@@ -363,13 +363,13 @@
                         
                         <!-- Team 2 -->
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2.5 overflow-hidden">
-                                <img src="${info2.avatar}" class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-800 shrink-0 border border-gray-700 object-cover" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                                <span class="font-semibold text-xs md:text-sm truncate ${pts2.actual > pts1.actual ? 'text-white' : 'text-gray-300'}">${info2.name}</span>
+                            <div class="flex items-center gap-2 overflow-hidden">
+                                <img src="${info2.avatar}" class="w-6 h-6 rounded-full bg-gray-800 shrink-0 border border-gray-700 object-cover" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
+                                <span class="font-semibold text-xs truncate ${pts2.actual > pts1.actual ? 'text-white' : 'text-gray-400'}">${info2.name}</span>
                             </div>
-                            <div class="text-right shrink-0 ml-3">
-                                <div class="text-base md:text-lg font-bold font-mono leading-tight ${pts2.actual > pts1.actual ? 'text-white' : 'text-gray-400'}">${pts2.actual.toFixed(2)}</div>
-                                <div class="text-[9px] md:text-[10px] text-gray-500 font-mono tracking-tighter">Proj ${pts2.proj.toFixed(2)}</div>
+                            <div class="text-right shrink-0 ml-2 flex items-center gap-2">
+                                <div class="text-[9px] text-gray-600 font-mono hidden 2xl:block tracking-tighter">Proj ${pts2.proj.toFixed(1)}</div>
+                                <div class="text-sm font-bold font-mono leading-none ${pts2.actual > pts1.actual ? 'text-white' : 'text-gray-500'}">${pts2.actual.toFixed(2)}</div>
                             </div>
                         </div>
                     </div>
