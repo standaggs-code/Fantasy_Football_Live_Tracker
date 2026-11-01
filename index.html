@@ -776,7 +776,7 @@
 
         function determinePlayStyle(playText) {
             const text = playText.toLowerCase();
-            const isWarning = text.includes("incomplete") || text.includes("sacked") || text.includes("intercept") || text.includes("fumble");
+            const isWarning = text.includes("incomplete") || text.includes("sacked") || text.includes("intercept") || text.includes("fumble") || /-\d+\s+yard/.test(text) || text.includes("loss of");
             const isScoring = text.includes("touchdown") || text.includes("field goal is good") || text.includes("two-point conversion") || text.includes("extra point is good") || text.includes(" safety");
 
             const myPlayer = getMatchingPlayer(text, MY_TEAM_PARSED);
