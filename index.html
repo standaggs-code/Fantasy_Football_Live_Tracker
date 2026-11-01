@@ -251,7 +251,7 @@
                 <div class="px-2 py-1.5 border-b border-gray-800 bg-gray-950/40 flex flex-wrap gap-3 text-[9px] uppercase tracking-wider text-gray-500 justify-center shrink-0 z-10 shadow-inner">
                     <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-green-500"></span> My Team</div>
                     <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-red-500"></span> Opponent</div>
-                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-yellow-500"></span> Inc</div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-yellow-500"></span> Warn</div>
                     <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-cyan-500"></span> Def</div>
                     <div class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-gray-500"></span> Bench</div>
                 </div>
@@ -776,7 +776,7 @@
 
         function determinePlayStyle(playText) {
             const text = playText.toLowerCase();
-            const isIncomplete = text.includes("incomplete");
+            const isWarning = text.includes("incomplete") || text.includes("sacked") || text.includes("intercept") || text.includes("fumble");
             const isScoring = text.includes("touchdown") || text.includes("field goal is good") || text.includes("two-point conversion") || text.includes("extra point is good") || text.includes(" safety");
 
             const myPlayer = getMatchingPlayer(text, MY_TEAM_PARSED);
@@ -790,8 +790,8 @@
                     if (!myPlayer.isStarter) {
                         return { classes: "bg-gray-800/80 border-gray-600 text-gray-400", badge: `<span class="bg-gray-700 text-gray-300 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🪑 My Bench</span>`, isRelevant: true, isScoring: isScoring };
                     }
-                    if (isIncomplete) {
-                        return { classes: "bg-yellow-950/40 border-yellow-500/50 text-yellow-100", badge: `<span class="bg-yellow-900 text-yellow-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ My Team (Inc)</span>`, isRelevant: true, isScoring: false };
+                    if (isWarning) {
+                        return { classes: "bg-yellow-950/40 border-yellow-500/50 text-yellow-100", badge: `<span class="bg-yellow-900 text-yellow-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ My Team (Warn)</span>`, isRelevant: true, isScoring: false };
                     }
                     return { classes: "bg-green-950/40 border-green-500/50 text-green-100", badge: `<span class="bg-green-900 text-green-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🚨 My Team</span>`, isRelevant: true, isScoring: isScoring };
                 }
@@ -805,8 +805,8 @@
                     if (!oppPlayer.isStarter) {
                         return { classes: "bg-gray-800/80 border-gray-600 text-gray-500", badge: `<span class="bg-gray-700 text-gray-400 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🪑 Opp Bench</span>`, isRelevant: true, isScoring: isScoring };
                     }
-                    if (isIncomplete) {
-                        return { classes: "bg-orange-950/40 border-orange-500/50 text-orange-100", badge: `<span class="bg-orange-900 text-orange-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ Opponent (Inc)</span>`, isRelevant: true, isScoring: false };
+                    if (isWarning) {
+                        return { classes: "bg-orange-950/40 border-orange-500/50 text-orange-100", badge: `<span class="bg-orange-900 text-orange-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">⚠️ Opponent (Warn)</span>`, isRelevant: true, isScoring: false };
                     }
                     return { classes: "bg-red-950/40 border-red-500/50 text-red-100", badge: `<span class="bg-red-900 text-red-200 text-[10px] px-1.5 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">🚨 Opponent</span>`, isRelevant: true, isScoring: isScoring };
                 }
