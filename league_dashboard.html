@@ -67,13 +67,13 @@
     </header>
 
     <!-- Main Scrollable Canvas -->
-    <main class="flex-1 overflow-y-auto p-2 md:p-4 flex flex-col gap-4 bg-[#0a0f1c] no-scrollbar">
+    <main class="flex-1 overflow-y-auto p-2 md:p-4 flex flex-col gap-2 bg-[#0a0f1c] no-scrollbar">
         
         <!-- ROW 1: HEAD-TO-HEAD -->
         <section class="flex flex-col bg-gray-950 border border-gray-800 rounded-xl shadow-sm overflow-hidden shrink-0">
             <!-- Section Header -->
             <div class="p-2 md:p-3 border-b border-gray-800 bg-gray-900/80 flex justify-between items-center shadow-sm z-10">
-                <h2 class="text-sm md:text-lg font-bold text-white flex items-center gap-2 truncate">
+                <h2 class="text-sm md:text-lg font-bold text-white flex items-center gap-1 truncate">
                     <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span> Head-to-Head
                 </h2>
                 <div id="matchup-margin" class="px-2 md:px-3 py-0.5 bg-gray-950 rounded-full text-[10px] md:text-xs font-bold border border-gray-800 text-gray-400 tracking-wider whitespace-nowrap">
@@ -96,13 +96,13 @@
             <!-- Left Panel: League Scoreboard -->
             <div class="flex flex-col h-full min-w-0">
                 <div class="p-2 md:p-3 border-b border-gray-800 bg-gray-900/80 flex justify-between items-center shrink-0">
-                    <h2 class="text-sm md:text-lg font-bold text-white flex items-center gap-2">
+                    <h2 class="text-sm md:text-lg font-bold text-white flex items-center gap-1">
                         <span class="w-2 h-2 rounded-full bg-blue-500"></span> League Scoreboard
                     </h2>
                     <span class="text-[9px] md:text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded-md" id="league-update-time">Waiting...</span>
                 </div>
-                <div class="flex-1 overflow-y-auto p-1.5 md:p-2.5 flex flex-col gap-3">
-                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-1.5 md:gap-2" id="league-matchups-grid">
+                <div class="flex-1 overflow-y-auto p-1.5 md:p-2.5 flex flex-col gap-2">
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-1.5 md:gap-1" id="league-matchups-grid">
                         <!-- Scoreboard Cards Injected Here -->
                     </div>
                 </div>
@@ -110,12 +110,12 @@
             
             <!-- Right Panel: Real NFL Games -->
             <div class="flex flex-col h-full min-w-0">
-                <div class="p-2 md:p-3 border-b border-gray-800 bg-gray-900/80 flex items-center gap-2 shrink-0">
+                <div class="p-2 md:p-3 border-b border-gray-800 bg-gray-900/80 flex items-center gap-1 shrink-0">
                     <span class="w-2 h-2 rounded-full bg-purple-500"></span>
                     <h2 class="text-sm md:text-lg font-bold text-white tracking-widest uppercase">NFL Games</h2>
                 </div>
                 <div class="flex-1 overflow-y-auto p-1.5 md:p-2.5">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1.5 md:gap-2" id="nfl-games-grid">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 md:gap-1" id="nfl-games-grid">
                         <div class="col-span-full text-center text-xs text-gray-600 italic">Waiting for NFL data...</div>
                     </div>
                 </div>
