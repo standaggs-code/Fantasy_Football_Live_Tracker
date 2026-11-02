@@ -80,9 +80,9 @@
                 </div>
             </div>
             
-            <div id="my-matchup-container" class="flex-1 overflow-hidden p-1.5 md:p-2.5 grid grid-cols-1 xl:grid-cols-2 gap-2 md:gap-3 h-full">
+            <div id="my-matchup-container" class="flex-1 overflow-y-auto p-2 md:p-3 flex flex-col gap-3 md:gap-4 h-full no-scrollbar">
                 <!-- Injected via JS -->
-                <div class="flex w-full h-full items-center justify-center text-gray-500 italic text-sm col-span-full">
+                <div class="flex w-full h-full items-center justify-center text-gray-500 italic text-sm">
                     Select a league to view your matchup.
                 </div>
             </div>
@@ -491,7 +491,7 @@
             const buildCol = (matchup, roster, isMe) => {
                 if (!matchup) {
                     return { 
-                        html: `<div class="flex flex-col min-w-0 bg-gray-900 border border-gray-800 rounded-lg h-full"><div class="p-4 text-center text-gray-500 italic text-xs">No Opponent</div></div>`, 
+                        html: `<div class="flex flex-col min-w-0 bg-gray-900 border border-gray-800 rounded-lg"><div class="p-4 text-center text-gray-500 italic text-xs">No Opponent</div></div>`, 
                         actual: 0 
                     };
                 }
@@ -596,7 +596,7 @@
                 });
 
                 let html = `
-                    <div class="flex flex-col min-w-0 h-full border ${isMe ? 'border-blue-900/50' : 'border-gray-800'} rounded-lg overflow-hidden bg-gray-900/40 shadow-sm">
+                    <div class="flex flex-col min-w-0 border ${isMe ? 'border-blue-900/50' : 'border-gray-800'} rounded-lg overflow-hidden bg-gray-900/40 shadow-sm shrink-0">
                         <div class="flex items-center justify-between p-2 md:p-3 bg-gray-900 border-b ${isMe ? 'border-blue-900/50' : 'border-gray-800'} shrink-0 z-10 shadow-sm">
                             <div class="flex items-center gap-2 overflow-hidden">
                                 <img src="${avatar}" class="w-8 h-8 rounded-full border border-gray-700 object-cover shrink-0">
@@ -610,17 +610,17 @@
                                 <div class="text-[9px] md:text-[10px] text-gray-500 font-mono tracking-tight mt-0.5">Proj ${proj.toFixed(2)}</div>
                             </div>
                         </div>
-                        <div class="flex-1 overflow-y-auto no-scrollbar">
-                            <div class="p-1.5 bg-gray-900/80 text-center border-b ${isMe ? 'border-blue-900/30' : 'border-gray-800'} shrink-0 sticky top-0 z-10">
+                        <div>
+                            <div class="p-1.5 bg-gray-900/80 text-center border-b ${isMe ? 'border-blue-900/30' : 'border-gray-800'} shrink-0">
                                 <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Starters</span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-1.5 p-1.5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-1.5 p-1.5">
                                 ${startersRows}
                             </div>
-                            <div class="p-1.5 bg-gray-900/80 text-center border-y ${isMe ? 'border-blue-900/30' : 'border-gray-800'} shrink-0 sticky top-0 z-10">
+                            <div class="p-1.5 bg-gray-900/80 text-center border-y ${isMe ? 'border-blue-900/30' : 'border-gray-800'} shrink-0">
                                 <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Bench & IR</span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-1.5 p-1.5 opacity-90 hover:opacity-100 transition-opacity">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-1.5 p-1.5 opacity-90 hover:opacity-100 transition-opacity">
                                 ${benchRows}
                             </div>
                         </div>
