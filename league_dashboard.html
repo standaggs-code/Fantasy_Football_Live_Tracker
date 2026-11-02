@@ -268,7 +268,6 @@
         }
 
         async function fetchEspnData() {
-            if (TARGET_TEAMS.size === 0) return;
             try {
                 const response = await fetch("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard");
                 if (!response.ok) return;
@@ -622,13 +621,13 @@
                             <div class="py-0.5 px-1.5 bg-gray-900/60 text-center border-b ${isMe ? 'border-blue-900/30' : 'border-gray-800'} shrink-0">
                                 <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Starters</span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-1 md:gap-1.5 p-1.5 md:p-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 md:gap-1.5 p-1.5 md:p-2">
                                 ${startersRows}
                             </div>
                             <div class="py-0.5 px-1.5 bg-gray-900/60 text-center border-y ${isMe ? 'border-blue-900/30' : 'border-gray-800'} shrink-0 mt-auto">
                                 <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Bench & IR</span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-1 md:gap-1.5 p-1.5 md:p-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 md:gap-1.5 p-1.5 md:p-2">
                                 ${benchRows}
                             </div>
                         </div>
